@@ -40,11 +40,17 @@ defmodule TripTallyWeb.Trips.TripsController do
     user_id = conn.assigns.current_user.id
     combined_params = Map.put(params, "user_id", user_id)
 
-    with {:ok, %Trips{} = trip} <-
-           TripTally.Trips.create_trip_with_location(combined_params) do
-      conn
-      |> put_status(:created)
-      |> render(:show, trip: trip)
+    case TripTally.Trips.create_trip_with_location(combined_params) do
+      {:ok, %Trips{} = trip} ->
+        conn
+        |> put_status(:created)
+        |> render(:show, trip: trip)
+
+      {:error, changeset} ->
+        {:error, changeset}
+
+      _ ->
+        {:error, :forbidden}
     end
   end
 
