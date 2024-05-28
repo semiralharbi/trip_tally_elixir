@@ -28,6 +28,7 @@ defmodule TripTallyWeb.Router do
     pipe_through :api
 
     post "/users/log_in", ApiTokenSessionController, :create
+    post "/users/register", ApiTokenSessionController, :register
   end
 
   scope "/", TripTallyWeb do

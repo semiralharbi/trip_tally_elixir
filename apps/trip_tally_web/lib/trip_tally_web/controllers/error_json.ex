@@ -4,7 +4,7 @@ defmodule TripTallyWeb.ErrorJSON do
     errors =
       Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
         Enum.reduce(opts, msg, fn {key, val}, acc ->
-          String.replace(acc, "%{#{key}}", to_string(val))
+          String.replace(acc, "%{#{key}}", inspect(val))
         end)
       end)
 
