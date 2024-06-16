@@ -98,7 +98,7 @@ defmodule TripTallyWeb.Router do
   end
 
   scope "/api", TripTallyWeb do
-    pipe_through [:private_api, :require_authenticated_user]
+    pipe_through [:private_api]
 
     resources "/trips", Trips.TripsController, except: [:new, :edit]
     resources "/expenses", Expenses.ExpenseController, except: [:new, :edit]

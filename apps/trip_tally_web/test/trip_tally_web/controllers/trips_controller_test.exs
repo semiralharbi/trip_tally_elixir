@@ -39,15 +39,14 @@ defmodule TripTallyWeb.TripsControllerTest do
   end
 
   describe "create" do
-    test "renders created trip when data is valid", %{conn: conn} do
-      {:ok, id} = create_trip(conn)
+    test "renders created trip when data is valid", %{conn: conn, user: %{id: user_id}} do
+      {:ok, trip_id} = create_trip(conn)
 
-      conn = get(conn, "/api/trips/#{id}")
-      user_id = conn.assigns.current_user.id
+      conn = get(conn, "/api/trips/#{trip_id}")
 
       assert %{
                "trip" => %{
-                 "trip_id" => ^id,
+                 "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
                  "planned_cost" => 300,
                  "transport_type" => "Bus",
@@ -59,7 +58,7 @@ defmodule TripTallyWeb.TripsControllerTest do
              } = json_response(conn, 200)
     end
 
-    test "renders created trip when city name has greek char", %{conn: conn} do
+    test "renders created trip when city name has Greek char", %{conn: conn, user: %{id: user_id}} do
       conn =
         post(conn, "/api/trips", %{
           "transport_type" => "Bus",
@@ -70,14 +69,13 @@ defmodule TripTallyWeb.TripsControllerTest do
           "city_name" => "Αθήνα"
         })
 
-      assert %{"trip" => %{"trip_id" => id}} = json_response(conn, 201)
+      assert %{"trip" => %{"trip_id" => trip_id}} = json_response(conn, 201)
 
-      conn = get(conn, "/api/trips/#{id}")
-      user_id = conn.assigns.current_user.id
+      conn = get(conn, "/api/trips/#{trip_id}")
 
       assert %{
                "trip" => %{
-                 "trip_id" => ^id,
+                 "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
                  "planned_cost" => 300,
                  "transport_type" => "Bus",
@@ -97,8 +95,7 @@ defmodule TripTallyWeb.TripsControllerTest do
                  "transport_type" => ["can't be blank"],
                  "planned_cost" => ["can't be blank"]
                }
-             } =
-               json_response(conn, 422)
+             } = json_response(conn, 422)
     end
 
     test "renders errors when country_code and city_name is invalid", %{conn: conn} do
@@ -109,25 +106,19 @@ defmodule TripTallyWeb.TripsControllerTest do
                  "country_code" => ["can't be blank"],
                  "city_name" => ["can't be blank"]
                }
-             } =
-               json_response(conn, 422)
+             } = json_response(conn, 422)
     end
   end
 
   describe "update" do
-    test "renders updated trip when data is valid", %{
-      conn: conn
-    } do
-      {:ok, id} = create_trip(conn)
+    test "renders updated trip when data is valid", %{conn: conn, user: %{id: user_id}} do
+      {:ok, trip_id} = create_trip(conn)
 
-      conn =
-        put(conn, "/api/trips/#{id}", %{"trip_params" => @update_attrs})
-
-      user_id = conn.assigns.current_user.id
+      conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @update_attrs})
 
       assert %{
                "trip" => %{
-                 "trip_id" => ^id,
+                 "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
                  "planned_cost" => 350,
                  "transport_type" => "Bus",
@@ -139,13 +130,10 @@ defmodule TripTallyWeb.TripsControllerTest do
              } = json_response(conn, 200)
     end
 
-    test "renders errors when data is invalid", %{
-      conn: conn
-    } do
-      {:ok, id} = create_trip(conn)
+    test "renders errors when data is invalid", %{conn: conn} do
+      {:ok, trip_id} = create_trip(conn)
 
-      conn =
-        put(conn, "/api/trips/#{id}", %{"trip_params" => @invalid_attrs})
+      conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @invalid_attrs})
 
       assert json_response(conn, 422) == %{
                "errors" => %{
@@ -158,11 +146,11 @@ defmodule TripTallyWeb.TripsControllerTest do
 
   describe "delete" do
     test "deletes chosen trip", %{conn: conn} do
-      {:ok, id} = create_trip(conn)
-      conn = delete(conn, "/api/trips/#{id}")
+      {:ok, trip_id} = create_trip(conn)
+      conn = delete(conn, "/api/trips/#{trip_id}")
       assert response(conn, 204)
 
-      conn = get(conn, "/api/trips/#{id}")
+      conn = get(conn, "/api/trips/#{trip_id}")
       assert response(conn, 404)
     end
   end

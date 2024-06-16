@@ -40,7 +40,7 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
   Returns: JSON representation of the newly created expense with its unique identifier, or an error message if the creation fails.
   """
 
-  def create(conn, %{"expense" => params}, user_id) do
+  def create(conn, params, user_id) do
     params =
       params
       |> Map.put("user_id", user_id)
