@@ -5,7 +5,7 @@ defmodule TripTally.Repo.Migrations.CreateTrips do
     create table(:trips, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :transport_type, :string
-      add :planned_cost, :integer
+      add :planned_cost, :float
       add :date_from, :date
       add :date_to, :date
       add :location_id, references(:locations, on_delete: :nothing, type: :binary_id)

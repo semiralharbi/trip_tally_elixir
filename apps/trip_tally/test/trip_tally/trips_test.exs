@@ -66,5 +66,48 @@ defmodule TripTally.TripsTest do
     test "deletes non-existent trip raises error" do
       assert {:error, :not_found} = Trips.delete(@invalid_trip_id)
     end
+
+    # New tests for different formats
+
+    test "handles date formats correctly" do
+      {:ok, trip} = TripsFixtures.trips_fixture()
+
+      new_attrs1 = %{"date_from" => "2023-06-25", "date_to" => "2023-07-25"}
+      assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
+      assert updated_trip1.date_from == ~D[2023-06-25]
+      assert updated_trip1.date_to == ~D[2023-07-25]
+
+      new_attrs2 = %{"date_from" => "25-06-2023", "date_to" => "25-07-2023"}
+      assert {:ok, updated_trip2} = Trips.update(trip.id, new_attrs2)
+      assert updated_trip2.date_from == ~D[2023-06-25]
+      assert updated_trip2.date_to == ~D[2023-07-25]
+
+      new_attrs3 = %{"date_from" => "25.06.2023", "date_to" => "25.07.2023"}
+      assert {:ok, updated_trip3} = Trips.update(trip.id, new_attrs3)
+      assert updated_trip3.date_from == ~D[2023-06-25]
+      assert updated_trip3.date_to == ~D[2023-07-25]
+    end
+
+    test "handles planned cost formats correctly" do
+      {:ok, trip} = TripsFixtures.trips_fixture()
+
+      new_attrs1 = %{"planned_cost" => "300"}
+      assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
+      assert updated_trip1.planned_cost == 300.0
+
+      new_attrs2 = %{"planned_cost" => 400}
+      assert {:ok, updated_trip2} = Trips.update(trip.id, new_attrs2)
+      assert updated_trip2.planned_cost == 400.0
+
+      new_attrs3 = %{"planned_cost" => 400.0}
+      assert {:ok, updated_trip3} = Trips.update(trip.id, new_attrs3)
+      assert updated_trip3.planned_cost == 400.0
+
+      new_attrs4 = %{"planned_cost" => "invalid_cost"}
+      assert {:error, changeset} = Trips.update(trip.id, new_attrs4)
+
+      assert changeset.errors ==
+               [planned_cost: {"is invalid", [type: :float, validation: :cast]}]
+    end
   end
 end
