@@ -44,7 +44,8 @@ defmodule TripTally.MixProject do
       {:jason, "~> 1.2"},
       {:swoosh, "~> 1.5"},
       {:finch, "~> 0.13"},
-      {:money, "~> 1.12.4"}
+      {:money, "~> 1.12.4"},
+      {:timex, "~> 3.7.11"}
     ]
   end
 

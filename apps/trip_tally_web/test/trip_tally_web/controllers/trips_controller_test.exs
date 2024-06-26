@@ -48,7 +48,7 @@ defmodule TripTallyWeb.TripsControllerTest do
                "trip" => %{
                  "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
-                 "planned_cost" => 300,
+                 "planned_cost" => 300.0,
                  "transport_type" => "Bus",
                  "city_name" => "Poznań",
                  "country_code" => "PL",
@@ -62,7 +62,7 @@ defmodule TripTallyWeb.TripsControllerTest do
       conn =
         post(conn, "/api/trips", %{
           "transport_type" => "Bus",
-          "planned_cost" => 300,
+          "planned_cost" => 300.0,
           "date_from" => ~D[2024-04-01],
           "date_to" => ~D[2024-04-10],
           "country_code" => "GR",
@@ -77,7 +77,7 @@ defmodule TripTallyWeb.TripsControllerTest do
                "trip" => %{
                  "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
-                 "planned_cost" => 300,
+                 "planned_cost" => 300.0,
                  "transport_type" => "Bus",
                  "city_name" => "Αθήνα",
                  "country_code" => "GR",
@@ -120,7 +120,7 @@ defmodule TripTallyWeb.TripsControllerTest do
                "trip" => %{
                  "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
-                 "planned_cost" => 350,
+                 "planned_cost" => 350.0,
                  "transport_type" => "Bus",
                  "city_name" => "Poznań",
                  "country_code" => "PL",
