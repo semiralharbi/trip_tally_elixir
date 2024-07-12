@@ -1,8 +1,8 @@
 defmodule TripTallyWeb.ApiTokenSessionController do
   use TripTallyWeb, :controller
 
+  alias TripTallyWeb.ApiTokenSessionJSON
   alias TripTally.Accounts
-  alias TripTallyWeb.UserAuth
   action_fallback TripTallyWeb.FallbackController
 
   @doc """
@@ -18,10 +18,18 @@ defmodule TripTallyWeb.ApiTokenSessionController do
   Returns: JSON with JWT token, which should be saved and used for authenticated requests.
   Failure: If the password or email are unsuccessful returns Invalid email or password.
   """
-  def create(conn, %{"email" => email, "password" => password}) do
+  def log_in(conn, %{"email" => email, "password" => password}) do
     case Accounts.get_user_by_email_and_password(email, password) do
-      nil -> {:error, :invalid_email_or_pass}
-      user -> UserAuth.log_in_user_api_token(conn, user)
+      nil ->
+        {:error, :invalid_email_or_pass}
+
+      user ->
+        token = Accounts.create_user_api_token(user)
+
+        conn
+        |> put_status(:ok)
+        |> put_view(ApiTokenSessionJSON)
+        |> render(:account_token, %{token: token, user: user})
     end
   end
 
@@ -43,13 +51,11 @@ defmodule TripTallyWeb.ApiTokenSessionController do
 
         conn
         |> put_status(:created)
-        |> render(:account_token, token: token)
+        |> put_view(ApiTokenSessionJSON)
+        |> render(:account_token, %{token: token, user: user})
 
       {:error, changeset} ->
         {:error, changeset}
-
-      e ->
-        IO.inspect(e)
     end
   end
 end
