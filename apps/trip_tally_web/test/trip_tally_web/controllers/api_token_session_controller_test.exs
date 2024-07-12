@@ -4,31 +4,54 @@ defmodule TripTallyWeb.ApiTokenSessionControllerTest do
   import TripTally.AccountsFixtures
 
   @user_attrs %{
-    :email => "user@example.com",
-    :password => "Password1!"
+    email: "user@example.com",
+    password: "Password1!"
+  }
+  @new_user_attrs %{
+    email: "user1@example.com",
+    password: "Password1!"
   }
   @user_invalid_attrs %{
     :email => "user@example.com",
     :password => "pa"
   }
 
-  describe "create" do
-    test "renders user token when data is valid", %{conn: conn} do
-      user_fixture(@user_attrs)
+  setup do
+    {:ok, user: user_fixture(@user_attrs)}
+  end
+
+  describe "log_in" do
+    test "renders user token when data is valid", %{
+      conn: conn,
+      user: %{id: id, email: email}
+    } do
       conn = post(conn, "/api/users/log_in", @user_attrs)
-      assert %{"token" => _token} = json_response(conn, 200)
+
+      assert %{
+               "token" => _,
+               "user" => %{
+                 "id" => ^id,
+                 "email" => ^email
+               }
+             } = json_response(conn, 200)
     end
 
     test "renders invalid email or password when the data is not valid", %{conn: conn} do
-      conn = post(conn, "/api/users/log_in", @user_attrs)
-      assert %{"error" => "Invalid email or password"} = json_response(conn, 401)
+      conn = post(conn, "/api/users/log_in", @user_invalid_attrs)
+      assert %{"errors" => "Invalid email or password"} = json_response(conn, 401)
     end
   end
 
   describe "register" do
     test "renders user token when data is valid", %{conn: conn} do
-      conn = post(conn, "/api/users/register", @user_attrs)
-      assert %{"token" => _token} = json_response(conn, 201)
+      conn = post(conn, "/api/users/register", @new_user_attrs)
+
+      assert %{
+               "token" => _,
+               "user" => %{
+                 "email" => "user1@example.com"
+               }
+             } = json_response(conn, 201)
     end
 
     test "renders invalid email or password when the data is not valid", %{conn: conn} do
@@ -46,8 +69,6 @@ defmodule TripTallyWeb.ApiTokenSessionControllerTest do
     end
 
     test "renders error when user already exists", %{conn: conn} do
-      user_fixture(@user_attrs)
-
       conn = post(conn, "/api/users/register", @user_attrs)
       assert %{"errors" => %{"email" => ["has already been taken"]}} = json_response(conn, 422)
     end

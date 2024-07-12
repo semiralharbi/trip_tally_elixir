@@ -50,6 +50,23 @@ defmodule TripTally.ExpensesTest do
                Expenses.create(attrs)
     end
 
+    test "create/1 returns changeset error with invalid data", %{user: user, trip: trip} do
+      invalid_attrs = %{
+        "name" => nil,
+        "date" => nil,
+        "price" => nil,
+        "trip_id" => trip.id,
+        "user_id" => user.id
+      }
+
+      assert {:error, changeset} = Expenses.create(invalid_attrs)
+
+      assert %{
+               date: ["can't be blank"],
+               price: ["can't be blank"]
+             } = errors_on(changeset)
+    end
+
     test "update/3 updates an expense by id", %{user: user, trip: trip} do
       {:ok, expense} =
         ExpensesFixtures.expense_fixture(%{"user_id" => user.id, "trip_id" => trip.id})

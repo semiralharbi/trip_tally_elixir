@@ -94,7 +94,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
     test "renders not found when expense does not exist", %{conn: conn} do
       conn = get(conn, "/api/expenses/#{UUID.uuid4()}")
 
-      assert "Not found" == response(conn, 404)
+      assert %{"errors" => "Not Found"} == json_response(conn, 404)
     end
   end
 
