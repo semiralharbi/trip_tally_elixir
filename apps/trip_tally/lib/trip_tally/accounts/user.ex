@@ -5,9 +5,9 @@ defmodule TripTally.Accounts.User do
 
   import Ecto.Changeset
 
-  alias TripTally.Trips.Trips
-  alias TripTally.Trips.Locations
   alias TripTally.Expenses.Expense
+  alias TripTally.Trips.Locations
+  alias TripTally.Trips.Trips
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -15,6 +15,9 @@ defmodule TripTally.Accounts.User do
     field :email, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
+    field :username, :string
+    field :country, :string
+    field :default_currency_code, :string
     field :confirmed_at, :naive_datetime
 
     has_many :trips, Trips
@@ -169,5 +172,17 @@ defmodule TripTally.Accounts.User do
     else
       add_error(changeset, :current_password, "is not valid")
     end
+  end
+
+  @doc """
+  A user changeset for updating the country, default_currency, and username.
+  """
+  def update_profile_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:country, :default_currency_code, :username])
+    |> validate_required([:country, :default_currency_code, :username])
+    |> validate_length(:country, max: 60)
+    |> validate_length(:default_currency_code, max: 3)
+    |> validate_length(:username, max: 20)
   end
 end

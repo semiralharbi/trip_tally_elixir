@@ -8,6 +8,9 @@ defmodule TripTally.Repo.Migrations.CreateUsersAuthTables do
       add :id, :binary_id, primary_key: true
       add :email, :citext, null: false
       add :hashed_password, :string, null: false
+      add :username, :string
+      add :country, :string
+      add :default_currency_code, :string
       add :confirmed_at, :naive_datetime
       timestamps()
     end

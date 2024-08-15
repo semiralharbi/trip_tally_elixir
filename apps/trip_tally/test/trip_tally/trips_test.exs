@@ -1,7 +1,8 @@
 defmodule TripTally.TripsTest do
   use TripTally.DataCase
-  alias TripTally.TripsFixtures
+
   alias TripTally.Trips
+  alias TripTally.TripsFixtures
 
   @invalid_user "123e4567-e89b-12d3-a456-426614174000"
   @invalid_trip_id "123e4567-e89b-12d3-a456-426614178000"

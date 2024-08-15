@@ -14,13 +14,13 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
 
   Returns: JSON array of expenses, either for a specific trip or all expenses associated with the user.
   """
-  def index(conn, %{"trip_id" => trip_id}, user_id) do
-    expenses = Expenses.get_all_trip_expenses(user_id, trip_id)
+  def index(conn, %{"trip_id" => trip_id}, user) do
+    expenses = Expenses.get_all_trip_expenses(user.id, trip_id)
     render(conn, "index.json", expenses: expenses)
   end
 
-  def index(conn, _params, user_id) do
-    expenses = Expenses.get_all_user_expenses(user_id)
+  def index(conn, _params, user) do
+    expenses = Expenses.get_all_user_expenses(user.id)
     render(conn, "index.json", expenses: expenses)
   end
 
@@ -40,10 +40,10 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
   Returns: JSON representation of the newly created expense with its unique identifier, or an error message if the creation fails.
   """
 
-  def create(conn, params, user_id) do
+  def create(conn, params, user) do
     params =
       params
-      |> Map.put("user_id", user_id)
+      |> Map.put("user_id", user.id)
 
     case Expenses.create(params) do
       {:ok, expense} ->
@@ -66,8 +66,8 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
 
   Returns: JSON representation of the specific expense if found and belongs to the user; otherwise, a not-found or forbidden status.
   """
-  def show(conn, %{"id" => id}, user_id) do
-    case Expenses.get_expense(id, user_id) do
+  def show(conn, %{"id" => id}, user) do
+    case Expenses.get_expense(id, user.id) do
       {:error, _reason} ->
         {:error, :not_found}
 
@@ -88,8 +88,8 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
   Returns: JSON representation of the updated expense if successful; otherwise, an error message.
   """
 
-  def update(conn, %{"id" => id, "expense" => params}, user_id) do
-    case Expenses.update(id, user_id, params) do
+  def update(conn, %{"id" => id, "expense" => params}, user) do
+    case Expenses.update(id, user.id, params) do
       {:ok, updated_expense} ->
         render(conn, "show.json", expense: updated_expense)
 
@@ -108,8 +108,8 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
 
   Returns: No content on successful deletion; otherwise, an error message.
   """
-  def delete(conn, %{"id" => id}, user_id) do
-    case Expenses.delete(id, user_id) do
+  def delete(conn, %{"id" => id}, user) do
+    case Expenses.delete(id, user.id) do
       {:ok, _} ->
         send_resp(conn, 204, "")
 

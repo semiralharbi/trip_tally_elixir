@@ -12,8 +12,8 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Returns: JSON array of created trips for the logged-in user.
   """
-  def index(conn, _params, user_id) do
-    trips = TripTally.Trips.get_trips_by_user(user_id)
+  def index(conn, _params, user) do
+    trips = TripTally.Trips.get_trips_by_user(user.id)
     render(conn, :index, trips: trips)
   end
 
@@ -32,8 +32,8 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Returns: JSON representation of the created trip, including its unique identifier.
   """
-  def create(conn, params, user_id) do
-    combined_params = Map.put(params, "user_id", user_id)
+  def create(conn, params, user) do
+    combined_params = Map.put(params, "user_id", user.id)
 
     case TripTally.Trips.create_trip_with_location(combined_params) do
       {:ok, %Trips{} = trip} ->
@@ -59,9 +59,9 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Returns: JSON representation of the trip if found and belongs to the user; otherwise, a forbidden status.
   """
-  def show(conn, %{"id" => trip_id}, user_id) do
+  def show(conn, %{"id" => trip_id}, user) do
     case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, trip} when trip.user_id == user_id ->
+      {:ok, trip} when trip.user_id == user.id ->
         render(conn, :show, trip: trip)
 
       {:ok, _} ->
@@ -89,9 +89,9 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Returns: JSON representation of the updated trip if successful; otherwise, an error message.
   """
-  def update(conn, %{"id" => trip_id, "trip_params" => trip_params}, user_id) do
+  def update(conn, %{"id" => trip_id, "trip_params" => trip_params}, user) do
     case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, trip} when trip.user_id == user_id ->
+      {:ok, trip} when trip.user_id == user.id ->
         case TripTally.Trips.update(trip.id, trip_params) do
           {:ok, updated_trip} ->
             render(conn, :show, trip: updated_trip)
@@ -118,9 +118,9 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Returns: No content on successful deletion; otherwise, an error message.
   """
-  def delete(conn, %{"id" => trip_id}, user_id) do
+  def delete(conn, %{"id" => trip_id}, user) do
     case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, %Trips{} = trip} when trip.user_id == user_id ->
+      {:ok, %Trips{} = trip} when trip.user_id == user.id ->
         case TripTally.Trips.delete(trip_id) do
           {:ok, %Trips{}} ->
             send_resp(conn, :no_content, "")

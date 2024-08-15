@@ -1,4 +1,8 @@
 defmodule TripTally.Expenses do
+  @moduledoc """
+  This module holds Expenses schema
+  """
+
   import Ecto.Query, warn: false
   alias TripTally.Money
   alias TripTally.Repo

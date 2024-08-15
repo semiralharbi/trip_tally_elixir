@@ -1,4 +1,8 @@
 defmodule TripTally.Trips.Trips do
+  @moduledoc """
+  Trips schema
+  """
+
   use Ecto.Schema
   import Ecto.Changeset
 
