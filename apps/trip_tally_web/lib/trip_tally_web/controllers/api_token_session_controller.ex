@@ -1,8 +1,9 @@
 defmodule TripTallyWeb.ApiTokenSessionController do
   use TripTallyWeb, :controller
 
-  alias TripTallyWeb.ApiTokenSessionJSON
   alias TripTally.Accounts
+  alias TripTallyWeb.ApiTokenSessionJSON
+
   action_fallback TripTallyWeb.FallbackController
 
   @doc """

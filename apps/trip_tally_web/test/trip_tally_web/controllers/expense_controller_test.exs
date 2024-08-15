@@ -1,8 +1,8 @@
 defmodule TripTallyWeb.ExpenseControllerTest do
   use TripTallyWeb.ConnCase, async: true
 
-  alias TripTally.TripsFixtures
   alias TripTally.ExpensesFixtures
+  alias TripTally.TripsFixtures
 
   setup :register_and_log_in_user
 
@@ -36,7 +36,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
       attrs = %{
         "name" => "Hotel",
-        "amount" => 10000,
+        "amount" => 10_000,
         "currency" => "USD",
         "date" => ~D[2024-04-30],
         "trip_id" => trip_id
@@ -48,7 +48,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
                "trip_id" => ^trip_id,
                "user_id" => ^user_id,
                "name" => "Hotel",
-               "amount" => 10000,
+               "amount" => 10_000,
                "currency" => "USD",
                "date" => "2024-04-30"
              } = json_response(conn, 201)

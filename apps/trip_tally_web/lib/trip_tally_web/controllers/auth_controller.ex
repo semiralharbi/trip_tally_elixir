@@ -7,8 +7,8 @@ defmodule TripTallyWeb.AuthController do
       action_fallback TripTallyWeb.FallbackController
 
       def action(conn, opts) do
-        user_id = conn.assigns.current_user.id
-        apply(__MODULE__, action_name(conn), [conn, conn.params, user_id])
+        user = conn.assigns.current_user
+        apply(__MODULE__, action_name(conn), [conn, conn.params, user])
       end
     end
   end

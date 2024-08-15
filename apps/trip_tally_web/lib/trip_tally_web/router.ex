@@ -24,13 +24,6 @@ defmodule TripTallyWeb.Router do
     plug :fetch_api_user
   end
 
-  scope "/api", TripTallyWeb do
-    pipe_through :api
-
-    post "/users/log_in", ApiTokenSessionController, :log_in
-    post "/users/register", ApiTokenSessionController, :register
-  end
-
   scope "/", TripTallyWeb do
     pipe_through :browser
 
@@ -98,8 +91,16 @@ defmodule TripTallyWeb.Router do
   end
 
   scope "/api", TripTallyWeb do
+    pipe_through :api
+
+    post "/users/log_in", ApiTokenSessionController, :log_in
+    post "/users/register", ApiTokenSessionController, :register
+  end
+
+  scope "/api", TripTallyWeb do
     pipe_through [:private_api]
 
+    put "/users/update_profile", User.UserController, :update_profile
     resources "/trips", Trips.TripsController, except: [:new, :edit]
     resources "/expenses", Expenses.ExpenseController, except: [:new, :edit]
   end

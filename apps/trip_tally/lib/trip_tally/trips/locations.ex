@@ -27,7 +27,8 @@ defmodule TripTally.Trips.Locations do
     |> unique_constraint(:city_name_country, name: :city_country_index)
   end
 
-  # Provides a way to validate that a city name contains only letters and spaces, accommodating a wide range of international characters.
+  # Provides a way to validate that a city name contains only letters and spaces, accommodating a wide range of
+  # international characters.
   defp validate_city_name_syntax(changeset) do
     city_name = get_field(changeset, :city_name) || ""
 

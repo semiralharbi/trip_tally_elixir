@@ -2,6 +2,12 @@ defmodule TripTallyWeb.FallbackController do
   alias TripTallyWeb.ErrorJSON
   use Phoenix.Controller
 
+  def call(conn, {:ok, :accepted}) do
+    conn
+    |> put_status(:accepted)
+    |> json(%{status: "success"})
+  end
+
   def call(conn, {:error, %Ecto.Changeset{} = changeset}) do
     conn
     |> put_status(:unprocessable_entity)

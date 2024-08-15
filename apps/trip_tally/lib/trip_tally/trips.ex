@@ -3,9 +3,9 @@ defmodule TripTally.Trips do
 
   import Ecto.Query, warn: false
 
+  alias TripTally.Locations
   alias TripTally.Repo
   alias TripTally.Trips.Trips
-  alias TripTally.Locations
 
   @doc """
   Creates a trip with a location obtained via `create_or_fetch_location`.

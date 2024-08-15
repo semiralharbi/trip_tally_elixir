@@ -1,4 +1,8 @@
 defmodule TripTally.Money do
+  @moduledoc """
+  This module holds helpers for Money
+  """
+
   alias TripTally.Expenses.Expense
 
   def create_price(attrs) do

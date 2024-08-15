@@ -522,4 +522,60 @@ defmodule TripTally.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "update_user_profile/2" do
+    setup do
+      %{user: user_fixture()}
+    end
+
+    test "updates sucessful", %{user: user} do
+      attrs = %{
+        country: "Mexico",
+        default_currency_code: "USD",
+        username: "Bolek"
+      }
+
+      assert {:ok, %{username: "Bolek", country: "Mexico", default_currency_code: "USD"}} =
+               Accounts.update_user_profile(user, attrs)
+    end
+
+    test "country name too long", %{user: user} do
+      attrs = %{
+        country: "MexicoMexicoMexicoMexicoMexicoMexicoMexicoMexicoMexicoMexicoMexico",
+        default_currency_code: "USD",
+        username: "Bolek"
+      }
+
+      assert {:error, changeset} =
+               Accounts.update_user_profile(user, attrs)
+
+      assert %{country: ["should be at most 60 character(s)"]} = errors_on(changeset)
+    end
+
+    test "wrong currency", %{user: user} do
+      attrs = %{
+        country: "Mexico",
+        default_currency_code: "USDSDS",
+        username: "Bolek"
+      }
+
+      assert {:error, changeset} =
+               Accounts.update_user_profile(user, attrs)
+
+      assert %{default_currency_code: ["should be at most 3 character(s)"]} = errors_on(changeset)
+    end
+
+    test "username too long", %{user: user} do
+      attrs = %{
+        country: "Mexico",
+        default_currency_code: "USD",
+        username: "BolekBolekBolekBolekBolekBolekBolekBolekBolekBolek"
+      }
+
+      assert {:error, changeset} =
+               Accounts.update_user_profile(user, attrs)
+
+      assert %{username: ["should be at most 20 character(s)"]} = errors_on(changeset)
+    end
+  end
 end

@@ -1,4 +1,7 @@
 defmodule TripTally.Expenses.Expense do
+  @moduledoc """
+  This module holds Expenses schema
+  """
   use Ecto.Schema
   import Ecto.Changeset
 

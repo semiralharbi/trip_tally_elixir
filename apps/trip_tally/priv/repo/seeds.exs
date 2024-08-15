@@ -9,6 +9,7 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+alias TripTally.Expenses.Expense
 alias TripTally.Repo
 alias TripTally.Accounts.User
 alias TripTally.Trips.Locations
@@ -35,10 +36,10 @@ location2 =
   |> Repo.insert!()
 
 # Trips
-_trip1 =
+trip1 =
   %Trips{
     transport_type: "Plane",
-    planned_cost: 1200,
+    planned_cost: 1200.0,
     date_from: ~D[2024-04-01],
     date_to: ~D[2024-04-10],
     location_id: location1.id,
@@ -50,7 +51,7 @@ _trip1 =
 _trip2 =
   %Trips{
     transport_type: "Train",
-    planned_cost: 300,
+    planned_cost: 300.0,
     date_from: ~D[2024-05-15],
     date_to: ~D[2024-05-20],
     location_id: location2.id,
@@ -58,3 +59,34 @@ _trip2 =
   }
   |> Trips.changeset(%{})
   |> Repo.insert!()
+
+# Expenses for trip1
+%Expense{
+  name: "Hotel Stay",
+  date: ~D[2024-04-02],
+  price: Money.new(450_00, :USD),
+  trip_id: trip1.id,
+  user_id: user1.id
+}
+|> Expense.changeset(%{})
+|> Repo.insert!()
+
+%Expense{
+  name: "Flight Meal",
+  date: ~D[2024-04-01],
+  price: Money.new(50_00, :USD),
+  trip_id: trip1.id,
+  user_id: user1.id
+}
+|> Expense.changeset(%{})
+|> Repo.insert!()
+
+%Expense{
+  name: "Museum Tickets",
+  date: ~D[2024-04-05],
+  price: Money.new(30_00, :USD),
+  trip_id: trip1.id,
+  user_id: user1.id
+}
+|> Expense.changeset(%{})
+|> Repo.insert!()

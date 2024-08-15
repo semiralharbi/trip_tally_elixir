@@ -6,7 +6,7 @@ defmodule TripTally.Accounts do
   import Ecto.Query, warn: false
   alias TripTally.Repo
 
-  alias TripTally.Accounts.{User, UserToken, UserNotifier}
+  alias TripTally.Accounts.{User, UserNotifier, UserToken}
 
   ## Database getters
 
@@ -374,5 +374,23 @@ defmodule TripTally.Accounts do
       {:ok, %{user: user}} -> {:ok, user}
       {:error, :user, changeset, _} -> {:error, changeset}
     end
+  end
+
+  @doc """
+  Updates the user's profile information: country, default_currency_code, and username.
+
+  ## Examples
+
+      iex> update_user_profile(user, %{country: "United States", default_currency_code: "USD", username: "new_username"})
+      {:ok, %User{}}
+
+      iex> update_user_profile(user, %{country: nil})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_user_profile(%User{} = user, attrs) do
+    user
+    |> User.update_profile_changeset(attrs)
+    |> Repo.update()
   end
 end
