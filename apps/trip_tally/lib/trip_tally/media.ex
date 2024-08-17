@@ -72,23 +72,35 @@ defmodule TripTally.Media do
   end
 
   defp delete_old_profile_picture(%User{profile_picture: %Attachment{id: id, url: url}}) do
-    case Repo.get(Attachment, id) do
+    attachment = Repo.get(Attachment, id)
+
+    case attachment do
       nil ->
         {:ok, nil}
 
-      attachment ->
-        case Repo.delete(attachment) do
-          {:ok, _} ->
-            case File.rm(Path.join(@upload_directory, Path.basename(url))) do
-              :ok -> {:ok, :deleted}
-              {:error, reason} -> {:error, reason}
-            end
-
-          {:error, reason} ->
-            {:error, reason}
+      _ ->
+        with {:ok, _} <- delete_attachment(attachment),
+             :ok <- delete_file_from_storage(url) do
+          {:ok, :deleted}
+        else
+          {:error, reason} -> {:error, reason}
         end
     end
   end
 
   defp delete_old_profile_picture(_user), do: {:ok, nil}
+
+  defp delete_attachment(attachment) do
+    case Repo.delete(attachment) do
+      {:ok, _} -> {:ok, :deleted}
+      {:error, reason} -> {:error, reason}
+    end
+  end
+
+  defp delete_file_from_storage(url) do
+    case File.rm(Path.join(@upload_directory, Path.basename(url))) do
+      :ok -> :ok
+      {:error, reason} -> {:error, reason}
+    end
+  end
 end
