@@ -5,6 +5,7 @@ defmodule TripTally.Accounts.User do
 
   import Ecto.Changeset
 
+  alias TripTally.Attachments.Attachment
   alias TripTally.Expenses.Expense
   alias TripTally.Trips.Locations
   alias TripTally.Trips.Trips
@@ -19,6 +20,11 @@ defmodule TripTally.Accounts.User do
     field :country, :string
     field :default_currency_code, :string
     field :confirmed_at, :naive_datetime
+
+    has_one :profile_picture, Attachment,
+      foreign_key: :user_id,
+      where: [type: :image],
+      on_replace: :delete
 
     has_many :trips, Trips
     has_many :locations, Locations
