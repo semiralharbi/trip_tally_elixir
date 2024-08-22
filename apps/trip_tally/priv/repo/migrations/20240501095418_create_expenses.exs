@@ -16,5 +16,6 @@ defmodule TripTally.Repo.Migrations.CreateExpenses do
     create index(:expenses, [:trip_id])
     create index(:expenses, [:name])
     create index(:expenses, [:user_id])
+    create index(:expenses, [:date])
   end
 end

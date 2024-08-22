@@ -12,23 +12,19 @@ defmodule TripTally.Expenses do
   @doc """
   Returns the list of all user expenses.
   """
-  def get_all_user_expenses(user_id, preload \\ []) do
-    preload_list = [:trips | preload]
-
+  def get_all_user_expenses(user_id) do
     Expense
     |> where([e], e.user_id == ^user_id)
-    |> preload(^preload_list)
     |> Repo.all()
   end
 
   @doc """
   Gets all trip expenses.
   """
-  def get_all_trip_expenses(user_id, trip_id, preload \\ []) do
+  def get_all_trip_expenses(user_id, trip_id) do
     Expense
     |> where([e], e.user_id == ^user_id)
     |> where([e], e.trip_id == ^trip_id)
-    |> preload(^preload)
     |> Repo.all()
   end
 

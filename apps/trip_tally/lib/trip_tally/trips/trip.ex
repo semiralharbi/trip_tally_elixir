@@ -1,15 +1,18 @@
-defmodule TripTally.Trips.Trips do
+defmodule TripTally.Trips.Trip do
   @moduledoc """
-  Trips schema
+  Trip schema
   """
-
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
 
-  alias Timex
+  alias TripTally.Expenses.Expense
+  alias TripTally.Repo
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+
+  @derive {Jason.Encoder, except: [:__meta__, :location_id, :user]}
 
   schema "trips" do
     field :transport_type, :string
@@ -18,7 +21,9 @@ defmodule TripTally.Trips.Trips do
     field :date_to, :date
 
     belongs_to :location, TripTally.Trips.Locations, type: :binary_id, foreign_key: :location_id
-    belongs_to :users, TripTally.Accounts.User, type: :binary_id, foreign_key: :user_id
+    belongs_to :user, TripTally.Accounts.User, type: :binary_id, foreign_key: :user_id
+
+    has_many :expenses, Expense, foreign_key: :trip_id
 
     timestamps()
   end
@@ -32,6 +37,7 @@ defmodule TripTally.Trips.Trips do
     trip
     |> cast(attrs, @required_params)
     |> validate_required(@required_params)
+    |> validate_dates_overlap()
   end
 
   def changeset_update(trip, attrs) do
@@ -40,6 +46,30 @@ defmodule TripTally.Trips.Trips do
     trip
     |> cast(attrs, @update_params)
     |> validate_required(@update_params)
+    |> validate_dates_overlap()
+  end
+
+  defp validate_dates_overlap(changeset) do
+    user_id = get_field(changeset, :user_id)
+    date_from = get_field(changeset, :date_from)
+    date_to = get_field(changeset, :date_to)
+    trip_id = get_field(changeset, :id)
+
+    __MODULE__
+    |> where([t], t.user_id == ^user_id)
+    |> where([t], t.date_from <= ^date_to and t.date_to >= ^date_from)
+    |> exclude_current_trip(trip_id)
+    |> Repo.exists?()
+    |> case do
+      true -> add_error(changeset, :date_from, "Overlapping trip exists for the given dates")
+      false -> changeset
+    end
+  end
+
+  defp exclude_current_trip(query, nil), do: query
+
+  defp exclude_current_trip(query, trip_id) do
+    where(query, [t], t.id != ^trip_id)
   end
 
   defp normalize_dates(attrs) do

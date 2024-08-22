@@ -17,5 +17,6 @@ defmodule TripTally.Repo.Migrations.CreateTrips do
     create index(:trips, [:location_id])
     create index(:trips, [:transport_type])
     create index(:trips, [:user_id])
+    create index(:trips, [:date_from, :date_to])
   end
 end

@@ -3,30 +3,50 @@ defmodule TripTally.Trips do
 
   import Ecto.Query, warn: false
 
+  alias Ecto.Multi
   alias TripTally.Locations
   alias TripTally.Repo
-  alias TripTally.Trips.Trips
+  alias TripTally.Trips.Trip
+
+  @doc """
+  Fetch trips starting today for a given user.
+  """
+  def fetch_trip_starting_today(user_id) do
+    today = Date.utc_today()
+
+    Trip
+    |> where([t], t.user_id == ^user_id and t.date_from == ^today)
+    |> Repo.one()
+    |> Repo.preload([:location, :expenses])
+  end
 
   @doc """
   Creates a trip with a location obtained via `create_or_fetch_location`.
   """
   def create_trip_with_location(attrs) do
-    with {:ok, location} <- Locations.create_or_fetch_location(attrs),
-         {:ok, trip} <-
-           create_trip(
-             Map.merge(attrs, %{
-               "location_id" => location.id
-             })
-           ) do
-      {:ok, trip |> Repo.preload(:location)}
-    else
-      error -> error
+    Multi.new()
+    |> Multi.run(:location, fn _repo, _changes ->
+      Locations.create_or_fetch_location(attrs)
+    end)
+    |> Multi.run(:trip, fn _repo, %{location: location} ->
+      attrs
+      |> Map.merge(%{"location_id" => location.id})
+      |> create_trip()
+    end)
+    |> Multi.run(:preload_trip, fn _repo, %{trip: trip} ->
+      preloaded_trip = Repo.preload(trip, [:location, :expenses])
+      {:ok, Map.drop(preloaded_trip, [:location_id])}
+    end)
+    |> Repo.transaction()
+    |> case do
+      {:ok, %{preload_trip: trip}} -> {:ok, trip}
+      {:error, _, error, _} -> {:error, error}
     end
   end
 
   defp create_trip(attrs) do
-    %Trips{}
-    |> Trips.changeset(attrs)
+    %Trip{}
+    |> Trip.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -35,9 +55,9 @@ defmodule TripTally.Trips do
   """
   def fetch_trip_by_id(id) do
     query =
-      Trips
+      Trip
       |> where([t], t.id == ^id)
-      |> preload(:location)
+      |> preload([:location, :expenses])
 
     case Repo.get(query, id) do
       nil -> {:error, :not_found}
@@ -48,13 +68,11 @@ defmodule TripTally.Trips do
   @doc """
   Fetch all trips by user_id.
   """
-  def get_trips_by_user(user_id, preload \\ []) do
-    preload_list = [:location | preload]
-
+  def get_trips_by_user(user_id) do
     query =
-      Trips
+      Trip
       |> where([t], t.user_id == ^user_id)
-      |> preload(^preload_list)
+      |> preload([:location, :expenses])
 
     Repo.all(query)
   end
@@ -63,11 +81,13 @@ defmodule TripTally.Trips do
   Update a trip by id and replace the attrs.
   """
   def update(id, attrs) do
-    case Repo.get!(Trips, id)
-         |> Trips.changeset_update(attrs)
-         |> Repo.update() do
+    Trip
+    |> Repo.get!(id)
+    |> Trip.changeset_update(attrs)
+    |> Repo.update()
+    |> case do
       {:ok, trip} ->
-        trip = Repo.preload(trip, :location)
+        trip = Repo.preload(trip, [:location, :expenses])
         {:ok, trip}
 
       {:error, changeset} ->
@@ -79,7 +99,7 @@ defmodule TripTally.Trips do
   Delete a trip by id.
   """
   def delete(id) do
-    case Repo.get(Trips, id) do
+    case Repo.get(Trip, id) do
       nil -> {:error, :not_found}
       trip -> Repo.delete(trip)
     end

@@ -24,6 +24,8 @@ defmodule TripTally.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import TripTally.DataCase
+      import TripTally.Factory
+      import ExMachina
     end
   end
 

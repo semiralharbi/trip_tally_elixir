@@ -1,21 +1,21 @@
 defmodule TripTally.ExpensesTest do
   use TripTally.DataCase
+
   alias TripTally.Expenses
-  alias TripTally.ExpensesFixtures
 
   @invalid_user_id "123e4567-e89b-12d3-a456-426614174000"
   @invalid_expense_id "123e4567-e89b-12d3-a456-426614174999"
 
   describe "Expenses management" do
     setup do
-      {:ok, trip} = TripTally.TripsFixtures.trips_fixture()
-      user = TripTally.AccountsFixtures.user_fixture()
+      user = insert(:user)
+      trip = insert(:trip, user_id: user.id)
+
       {:ok, user: user, trip: trip}
     end
 
     test "get_all_user_expenses returns expenses for a given user", %{user: user, trip: trip} do
-      {:ok, expense} =
-        ExpensesFixtures.expense_fixture(%{"user_id" => user.id, "trip_id" => trip.id})
+      expense = insert(:expense, %{user_id: user.id, trip_id: trip.id})
 
       expenses = Expenses.get_all_user_expenses(user.id)
       assert length(expenses) > 0
@@ -26,26 +26,17 @@ defmodule TripTally.ExpensesTest do
       assert [] == Expenses.get_all_user_expenses(@invalid_user_id)
     end
 
-    test "create/1 creates an expense successfully", %{user: user, trip: trip} do
-      user_id = user.id
-      trip_id = trip.id
-
-      attrs = %{
-        "name" => "Hotel",
-        "date" => ~D[2024-04-30],
-        "currency" => "USD",
-        "amount" => 12_050,
-        "trip_id" => trip_id,
-        "user_id" => user_id
-      }
+    test "create/1 creates an expense successfully" do
+      attrs =
+        string_params_for(:expense)
+        |> merge_attributes(%{"currency" => "USD", "amount" => 12_050})
+        |> Map.delete("price")
 
       assert {:ok,
               %{
-                name: "Hotel",
+                name: "Test Expense",
                 price: %{amount: 12_050, currency: :USD},
-                date: ~D[2024-04-30],
-                trip_id: ^trip_id,
-                user_id: ^user_id
+                date: ~D[2024-01-15]
               }} =
                Expenses.create(attrs)
     end
@@ -54,7 +45,6 @@ defmodule TripTally.ExpensesTest do
       invalid_attrs = %{
         "name" => nil,
         "date" => nil,
-        "price" => nil,
         "trip_id" => trip.id,
         "user_id" => user.id
       }
@@ -68,8 +58,7 @@ defmodule TripTally.ExpensesTest do
     end
 
     test "update/3 updates an expense by id", %{user: user, trip: trip} do
-      {:ok, expense} =
-        ExpensesFixtures.expense_fixture(%{"user_id" => user.id, "trip_id" => trip.id})
+      expense = insert(:expense, %{user_id: user.id, trip_id: trip.id})
 
       new_attrs = %{price: Money.new(20_000, :USD)}
 
@@ -78,8 +67,7 @@ defmodule TripTally.ExpensesTest do
     end
 
     test "delete/1 deletes an expense by id", %{user: user, trip: trip} do
-      {:ok, expense} =
-        ExpensesFixtures.expense_fixture(%{"user_id" => user.id, "trip_id" => trip.id})
+      expense = insert(:expense, %{user_id: user.id, trip_id: trip.id})
 
       assert {:ok, _} = Expenses.delete(expense.id, user.id)
       assert {:error, :not_found} == Expenses.get_expense(expense.id, user.id)

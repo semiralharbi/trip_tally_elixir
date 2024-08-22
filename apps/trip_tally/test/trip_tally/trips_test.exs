@@ -2,16 +2,39 @@ defmodule TripTally.TripsTest do
   use TripTally.DataCase
 
   alias TripTally.Trips
-  alias TripTally.TripsFixtures
 
   @invalid_user "123e4567-e89b-12d3-a456-426614174000"
   @invalid_trip_id "123e4567-e89b-12d3-a456-426614178000"
 
   describe "trips" do
+    test "checks if there is a trip for today" do
+      trip = insert(:trip, %{date_from: Timex.now()})
+      insert_list(4, :expense, %{user_id: trip.user_id, trip_id: trip.id})
+
+      assert %TripTally.Trips.Trip{
+               date_from: ~D[2024-08-22],
+               date_to: ~D[2024-01-05],
+               location: %TripTally.Trips.Locations{
+                 city_name: "New York",
+                 country_code: "US"
+               },
+               planned_cost: 100.0,
+               transport_type: "Bus",
+               expenses: expenses
+             } = Trips.fetch_trip_starting_today(trip.user_id)
+
+      assert length(expenses) == 4
+    end
+
     test "creates trip with location successfully" do
-      attrs = %{"country_code" => "PL", "city_name" => "Bydgoszcz"}
-      assert {:ok, trip} = TripsFixtures.trips_fixture(attrs)
-      assert trip.location_id
+      location_attrs = %{"country_code" => "PL", "city_name" => "Bydgoszcz"}
+
+      attrs =
+        string_params_for(:trip, location_attrs)
+
+      {:ok, trip} = Trips.create_trip_with_location(attrs)
+      assert trip.location.country_code == "PL"
+      assert trip.location.city_name == "Bydgoszcz"
     end
 
     test "fail to creates trip with invalid location data" do
@@ -26,7 +49,7 @@ defmodule TripTally.TripsTest do
     end
 
     test "fetches trip by existing id" do
-      {:ok, trip} = TripsFixtures.trips_fixture()
+      trip = insert(:trip)
       assert {:ok, fetched_trip} = Trips.fetch_trip_by_id(trip.id)
       assert fetched_trip.id == trip.id
     end
@@ -36,7 +59,7 @@ defmodule TripTally.TripsTest do
     end
 
     test "fetches all trips by user" do
-      {:ok, trip} = TripsFixtures.trips_fixture()
+      trip = insert(:trip)
       assert Trips.get_trips_by_user(trip.user_id) != []
     end
 
@@ -45,7 +68,7 @@ defmodule TripTally.TripsTest do
     end
 
     test "updates trip successfully" do
-      {:ok, trip} = TripsFixtures.trips_fixture()
+      trip = insert(:trip)
       new_attrs = %{"planned_cost" => 200}
       assert {:ok, updated_trip} = Trips.update(trip.id, new_attrs)
       assert updated_trip.planned_cost == 200
@@ -59,7 +82,7 @@ defmodule TripTally.TripsTest do
     end
 
     test "deletes trip successfully" do
-      {:ok, trip} = TripsFixtures.trips_fixture()
+      trip = insert(:trip)
       assert {:ok, _} = Trips.delete(trip.id)
       assert {:error, :not_found} == Trips.fetch_trip_by_id(trip.id)
     end
@@ -68,10 +91,8 @@ defmodule TripTally.TripsTest do
       assert {:error, :not_found} = Trips.delete(@invalid_trip_id)
     end
 
-    # New tests for different formats
-
     test "handles date formats correctly" do
-      {:ok, trip} = TripsFixtures.trips_fixture()
+      trip = insert(:trip)
 
       new_attrs1 = %{"date_from" => "2023-06-25", "date_to" => "2023-07-25"}
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
@@ -90,7 +111,7 @@ defmodule TripTally.TripsTest do
     end
 
     test "handles planned cost formats correctly" do
-      {:ok, trip} = TripsFixtures.trips_fixture()
+      trip = insert(:trip)
 
       new_attrs1 = %{"planned_cost" => "300"}
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)

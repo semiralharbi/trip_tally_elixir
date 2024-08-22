@@ -2,20 +2,10 @@ defmodule TripTallyWeb.ConnCase do
   @moduledoc """
   This module defines the test case to be used by
   tests that require setting up a connection.
-
-  Such tests rely on `Phoenix.ConnTest` and also
-  import other functionality to make it easier
-  to build common data structures and query the data layer.
-
-  Finally, if the test case interacts with the database,
-  we enable the SQL sandbox, so changes done to the database
-  are reverted at the end of every test. If you are using
-  PostgreSQL, you can even run database tests asynchronously
-  by setting `use TripTallyWeb.ConnCase, async: true`, although
-  this option is not recommended for other databases.
   """
 
   use ExUnit.CaseTemplate
+  import TripTally.Factory
 
   using do
     quote do
@@ -28,6 +18,7 @@ defmodule TripTallyWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import TripTallyWeb.ConnCase
+      import TripTally.Factory
     end
   end
 
@@ -37,7 +28,7 @@ defmodule TripTallyWeb.ConnCase do
   end
 
   @doc """
-  Setup helper that registers and logs in users.
+  Setup helper that creates and logs in users.
 
       setup :register_and_log_in_user
 
@@ -45,22 +36,19 @@ defmodule TripTallyWeb.ConnCase do
   test context.
   """
   def register_and_log_in_user(%{conn: conn}) do
-    user = TripTally.AccountsFixtures.user_fixture()
+    user = insert(:user)
     %{conn: log_in_user(conn, user), user: user}
   end
 
   @doc """
   Logs the given `user` into the `conn`.
 
-  It returns an updated `conn`.
+  It returns an updated `conn` and valid authorization token.
   """
   def log_in_user(conn, user) do
-    token = TripTally.Accounts.generate_user_session_token(user)
     api_token = TripTally.Accounts.create_user_api_token(user)
 
     conn
-    |> Phoenix.ConnTest.init_test_session(%{})
-    |> Plug.Conn.put_session(:user_token, token)
     |> Plug.Conn.put_req_header("authorization", "Bearer " <> api_token)
   end
 end

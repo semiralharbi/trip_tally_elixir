@@ -1,7 +1,7 @@
 defmodule TripTallyWeb.Trips.TripsController do
   use TripTallyWeb.AuthController
 
-  alias TripTally.Trips.Trips
+  alias TripTally.Trips.Trip
 
   @doc """
   Purpose: Fetches all trips created by the currently logged-in user.
@@ -36,7 +36,7 @@ defmodule TripTallyWeb.Trips.TripsController do
     combined_params = Map.put(params, "user_id", user.id)
 
     case TripTally.Trips.create_trip_with_location(combined_params) do
-      {:ok, %Trips{} = trip} ->
+      {:ok, %Trip{} = trip} ->
         conn
         |> put_status(:created)
         |> render(:show, trip: trip)
@@ -120,9 +120,9 @@ defmodule TripTallyWeb.Trips.TripsController do
   """
   def delete(conn, %{"id" => trip_id}, user) do
     case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, %Trips{} = trip} when trip.user_id == user.id ->
+      {:ok, %Trip{} = trip} when trip.user_id == user.id ->
         case TripTally.Trips.delete(trip_id) do
-          {:ok, %Trips{}} ->
+          {:ok, %Trip{}} ->
             send_resp(conn, :no_content, "")
 
           {:error, _reason} ->
@@ -132,5 +132,20 @@ defmodule TripTallyWeb.Trips.TripsController do
       _ ->
         {:error, :forbidden}
     end
+  end
+
+  @doc """
+  Purpose: Checks if there is a trip starting today for the logged-in user.
+
+  Endpoint: GET /api/trips/today
+
+  Parameters: None required. The user ID is obtained from the session.
+
+  Returns: JSON array of trips starting today, or an empty array if none found.
+  """
+  def today(conn, _params, user) do
+    trip = TripTally.Trips.fetch_trip_starting_today(user.id)
+
+    render(conn, :show, trip: trip)
   end
 end
