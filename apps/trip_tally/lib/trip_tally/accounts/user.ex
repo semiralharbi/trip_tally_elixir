@@ -8,7 +8,7 @@ defmodule TripTally.Accounts.User do
   alias TripTally.Attachments.Attachment
   alias TripTally.Expenses.Expense
   alias TripTally.Trips.Locations
-  alias TripTally.Trips.Trips
+  alias TripTally.Trips.Trip
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -26,7 +26,7 @@ defmodule TripTally.Accounts.User do
       where: [type: :image],
       on_replace: :delete
 
-    has_many :trips, Trips
+    has_many :trips, Trip
     has_many :locations, Locations
     has_many :expenses, Expense
 

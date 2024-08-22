@@ -8,6 +8,12 @@ defmodule TripTally.TripsTest do
   @invalid_trip_id "123e4567-e89b-12d3-a456-426614178000"
 
   describe "trips" do
+    test "checks if there is a trip for today" do
+      {:ok, trip} = TripsFixtures.trips_fixture(%{"date_from" => Timex.now()})
+
+      assert trip === Trips.fetch_trip_starting_today(trip.user_id)
+    end
+
     test "creates trip with location successfully" do
       attrs = %{"country_code" => "PL", "city_name" => "Bydgoszcz"}
       assert {:ok, trip} = TripsFixtures.trips_fixture(attrs)

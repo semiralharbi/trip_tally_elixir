@@ -13,7 +13,7 @@ alias TripTally.Expenses.Expense
 alias TripTally.Repo
 alias TripTally.Accounts.User
 alias TripTally.Trips.Locations
-alias TripTally.Trips.Trips
+alias TripTally.Trips.Trip
 
 # Users
 user1 =
@@ -37,7 +37,7 @@ location2 =
 
 # Trips
 trip1 =
-  %Trips{
+  %Trip{
     transport_type: "Plane",
     planned_cost: 1200.0,
     date_from: ~D[2024-04-01],
@@ -45,11 +45,11 @@ trip1 =
     location_id: location1.id,
     user_id: user1.id
   }
-  |> Trips.changeset(%{})
+  |> Trip.changeset(%{})
   |> Repo.insert!()
 
 _trip2 =
-  %Trips{
+  %Trip{
     transport_type: "Train",
     planned_cost: 300.0,
     date_from: ~D[2024-05-15],
@@ -57,7 +57,7 @@ _trip2 =
     location_id: location2.id,
     user_id: user2.id
   }
-  |> Trips.changeset(%{})
+  |> Trip.changeset(%{})
   |> Repo.insert!()
 
 # Expenses for trip1

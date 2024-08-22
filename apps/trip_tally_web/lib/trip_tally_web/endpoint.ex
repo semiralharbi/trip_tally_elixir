@@ -1,20 +1,6 @@
 defmodule TripTallyWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :trip_tally_web
 
-  # The session will be stored in the cookie and signed,
-  # this means its contents can be read but not tampered with.
-  # Set :encryption_salt if you would also like to encrypt it.
-  @session_options [
-    store: :cookie,
-    key: "_trip_tally_web_key",
-    signing_salt: "A/zvwRJp",
-    same_site: "Lax"
-  ]
-
-  socket "/live", Phoenix.LiveView.Socket,
-    websocket: [connect_info: [session: @session_options]],
-    longpoll: [connect_info: [session: @session_options]]
-
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest
@@ -34,10 +20,6 @@ defmodule TripTallyWeb.Endpoint do
     plug Phoenix.Ecto.CheckRepoStatus, otp_app: :trip_tally_web
   end
 
-  plug Phoenix.LiveDashboard.RequestLogger,
-    param_key: "request_logger",
-    cookie_key: "request_logger"
-
   plug Plug.RequestId
   plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
@@ -48,6 +30,5 @@ defmodule TripTallyWeb.Endpoint do
 
   plug Plug.MethodOverride
   plug Plug.Head
-  plug Plug.Session, @session_options
   plug TripTallyWeb.Router
 end

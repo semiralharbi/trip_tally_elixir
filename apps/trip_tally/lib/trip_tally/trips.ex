@@ -5,7 +5,19 @@ defmodule TripTally.Trips do
 
   alias TripTally.Locations
   alias TripTally.Repo
-  alias TripTally.Trips.Trips
+  alias TripTally.Trips.Trip
+
+  @doc """
+  Fetch trips starting today for a given user.
+  """
+  def fetch_trip_starting_today(user_id) do
+    today = Date.utc_today()
+
+    Trip
+    |> where([t], t.user_id == ^user_id and t.date_from == ^today)
+    |> Repo.one()
+    |> Repo.preload(:location)
+  end
 
   @doc """
   Creates a trip with a location obtained via `create_or_fetch_location`.
@@ -25,8 +37,8 @@ defmodule TripTally.Trips do
   end
 
   defp create_trip(attrs) do
-    %Trips{}
-    |> Trips.changeset(attrs)
+    %Trip{}
+    |> Trip.changeset(attrs)
     |> Repo.insert()
   end
 
@@ -35,7 +47,7 @@ defmodule TripTally.Trips do
   """
   def fetch_trip_by_id(id) do
     query =
-      Trips
+      Trip
       |> where([t], t.id == ^id)
       |> preload(:location)
 
@@ -52,7 +64,7 @@ defmodule TripTally.Trips do
     preload_list = [:location | preload]
 
     query =
-      Trips
+      Trip
       |> where([t], t.user_id == ^user_id)
       |> preload(^preload_list)
 
@@ -63,8 +75,8 @@ defmodule TripTally.Trips do
   Update a trip by id and replace the attrs.
   """
   def update(id, attrs) do
-    case Repo.get!(Trips, id)
-         |> Trips.changeset_update(attrs)
+    case Repo.get!(Trip, id)
+         |> Trip.changeset_update(attrs)
          |> Repo.update() do
       {:ok, trip} ->
         trip = Repo.preload(trip, :location)
@@ -79,7 +91,7 @@ defmodule TripTally.Trips do
   Delete a trip by id.
   """
   def delete(id) do
-    case Repo.get(Trips, id) do
+    case Repo.get(Trip, id) do
       nil -> {:error, :not_found}
       trip -> Repo.delete(trip)
     end
