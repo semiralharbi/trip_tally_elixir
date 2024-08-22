@@ -1,8 +1,6 @@
 defmodule TripTally.MediaTest do
   use TripTally.DataCase, async: true
 
-  import TripTally.AccountsFixtures
-
   alias TripTally.Attachments.Attachment
   alias TripTally.Media
 
@@ -12,7 +10,7 @@ defmodule TripTally.MediaTest do
   setup do
     File.mkdir_p!(@upload_directory)
 
-    {:ok, user: user_fixture()}
+    {:ok, user: insert(:user)}
   end
 
   test "upload_file_to_storage/1 uploads the file and returns the correct path", %{user: _user} do

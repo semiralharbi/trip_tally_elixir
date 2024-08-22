@@ -12,6 +12,16 @@ defmodule TripTally.Accounts.User do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @derive {Jason.Encoder,
+           only: [
+             :id,
+             :email,
+             :username,
+             :country,
+             :default_currency_code,
+             :confirmed_at,
+             :profile_picture
+           ]}
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true

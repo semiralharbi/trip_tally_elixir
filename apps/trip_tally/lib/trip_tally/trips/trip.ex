@@ -12,16 +12,7 @@ defmodule TripTally.Trips.Trip do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @derive {Jason.Encoder,
-           only: [
-             :id,
-             :transport_type,
-             :planned_cost,
-             :date_from,
-             :date_to,
-             :location,
-             :user_id
-           ]}
+  @derive {Jason.Encoder, except: [:__meta__, :location_id, :user]}
 
   schema "trips" do
     field :transport_type, :string

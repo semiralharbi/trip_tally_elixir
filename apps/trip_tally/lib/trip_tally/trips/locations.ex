@@ -10,7 +10,7 @@ defmodule TripTally.Trips.Locations do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
-  @derive {Jason.Encoder, only: [:id, :city_name, :country_code]}
+  @derive {Jason.Encoder, except: [:__meta__, :users]}
   schema "locations" do
     field :country_code, :string
     field :city_name, :string

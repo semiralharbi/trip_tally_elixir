@@ -3,6 +3,7 @@ defmodule TripTally.Factory do
   Factories for all schemas
   """
 
+  alias TripTally.Repo
   use ExMachina.Ecto, repo: TripTally.Repo
 
   alias Bcrypt
@@ -30,20 +31,24 @@ defmodule TripTally.Factory do
     %Locations{
       country_code: "US",
       city_name: "New York",
-      user_id: build(:user).id
+      user_id: insert(:user).id
     }
   end
 
   def trip_factory(attrs \\ %{}) do
-    location = find_or_create_location(attrs[:location] || %{})
+    user = insert(:user)
+
+    location_attrs = Map.get(attrs, :location, %{}) |> Map.merge(%{user_id: user.id})
+    location = find_or_create_location(location_attrs)
 
     %Trip{
       transport_type: "Bus",
       planned_cost: 100.0,
       date_from: ~D[2024-01-01],
       date_to: ~D[2024-01-05],
-      user_id: build(:user).id,
-      location: location
+      user_id: user.id,
+      location: location || insert(:location, location_attrs),
+      expenses: []
     }
     |> Map.merge(attrs)
   end
@@ -53,8 +58,8 @@ defmodule TripTally.Factory do
       name: "Test Expense",
       date: ~D[2024-01-15],
       price: Money.new(1000, :USD),
-      trip_id: build(:trip).id,
-      user_id: build(:user).id
+      trip_id: insert(:trip).id,
+      user_id: insert(:user).id
     }
   end
 
@@ -62,7 +67,6 @@ defmodule TripTally.Factory do
     city_name = Map.get(attrs, :city_name, "New York")
     country_code = Map.get(attrs, :country_code, "US")
 
-    TripTally.Repo.get_by(Locations, city_name: city_name, country_code: country_code) ||
-      insert(:location, city_name: city_name, country_code: country_code)
+    Repo.get_by(Locations, city_name: city_name, country_code: country_code)
   end
 end
