@@ -3,9 +3,10 @@ defmodule TripTally.Money do
   This module holds helpers for Money
   """
 
+  alias TripTally.Trips.Trip
   alias TripTally.Expenses.Expense
 
-  def create_price(attrs) do
+  def create_price(attrs, price_field) do
     amount =
       case Map.get(attrs, "amount") do
         amount when is_binary(amount) -> String.to_integer(amount)
@@ -22,17 +23,27 @@ defmodule TripTally.Money do
       end
 
     attrs
-    |> Map.put("price", price)
+    |> Map.put(price_field, price)
     |> Map.drop(["amount", "currency"])
   end
 
-  def maybe_update_price(params, %Expense{price: existing_price}) do
-    new_amount = Map.get(params, "amount", existing_price.amount)
+  def maybe_update_price(%Expense{price: existing_price}, params) do
+    new_amount = parse_amount_types(params, existing_price.amount)
     new_currency = Map.get(params, "currency", existing_price.currency)
 
     {new_amount, new_currency}
     |> update_price_if_changed(existing_price)
-    |> update_params_with_price(params)
+    |> update_params_with_price(params, "price")
+  end
+
+  def maybe_update_price(%Trip{planned_cost: existing_price}, params) do
+    new_amount = parse_amount_types(params, existing_price.amount)
+
+    new_currency = Map.get(params, "currency", existing_price.currency)
+
+    {new_amount, new_currency}
+    |> update_price_if_changed(existing_price)
+    |> update_params_with_price(params, "planned_cost")
   end
 
   defp update_price_if_changed({new_amount, new_currency}, %Money{
@@ -50,7 +61,19 @@ defmodule TripTally.Money do
     end
   end
 
-  defp update_params_with_price({:ok, nil}, params), do: params
-  defp update_params_with_price({:ok, new_price}, params), do: Map.put(params, "price", new_price)
-  defp update_params_with_price({:error, _}, params), do: Map.put(params, "price", "invalid")
+  defp parse_amount_types(params, existing_price_amount) do
+    case Map.get(params, "amount", existing_price_amount) do
+      amount when is_binary(amount) -> String.to_integer(amount)
+      amount when is_float(amount) -> round(amount * 100)
+      amount -> amount
+    end
+  end
+
+  defp update_params_with_price({:ok, nil}, params, _price_field), do: params
+
+  defp update_params_with_price({:ok, new_price}, params, price_field),
+    do: Map.put(params, price_field, new_price)
+
+  defp update_params_with_price({:error, _}, params, price_field),
+    do: Map.put(params, price_field, "invalid")
 end

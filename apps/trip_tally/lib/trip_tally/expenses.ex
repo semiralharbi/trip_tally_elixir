@@ -50,7 +50,7 @@ defmodule TripTally.Expenses do
     }
   """
   def create(attrs \\ %{}) do
-    params = Money.create_price(attrs)
+    params = Money.create_price(attrs, "price")
 
     %Expense{}
     |> Expense.changeset(params)
@@ -68,7 +68,7 @@ defmodule TripTally.Expenses do
   """
   def update(id, user_id, attrs) do
     with {:ok, expense} <- get_expense(id, user_id),
-         updated_attrs <- Money.maybe_update_price(attrs, expense) do
+         updated_attrs <- Money.maybe_update_price(expense, attrs) do
       Expense.changeset_update(expense, updated_attrs)
       |> Repo.update()
     end

@@ -24,8 +24,8 @@ defmodule TripTallyWeb.Router do
 
     put "/users/update_profile", User.UserController, :update_profile
 
-    resources "/trips", Trips.TripsController, except: [:new, :edit]
     get "/trips/today", Trips.TripsController, :today
+    resources "/trips", Trips.TripsController, except: [:new, :edit]
 
     resources "/expenses", Expenses.ExpenseController, except: [:new, :edit]
   end

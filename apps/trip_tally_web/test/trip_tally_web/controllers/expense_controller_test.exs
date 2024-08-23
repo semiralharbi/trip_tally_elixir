@@ -68,11 +68,11 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       conn = post(conn, "/api/expenses", invalid_attrs)
 
       assert %{
-               "errors" => %{
-                 "date" => ["can't be blank"],
-                 "price" => ["can't be blank"],
-                 "trip_id" => ["can't be blank"]
-               }
+               "errors" => [
+                 %{"field" => "date", "message" => "The Date cannot be blank."},
+                 %{"field" => "trip_id", "message" => "The Trip id cannot be blank."},
+                 %{"field" => "price", "message" => "The Price cannot be blank."}
+               ]
              } = json_response(conn, 422)
     end
   end
@@ -140,7 +140,8 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
       conn = put(conn, "/api/expenses/#{expense_id}", invalid_attrs)
 
-      assert %{"errors" => %{"price" => ["is invalid"]}} = json_response(conn, 422)
+      assert %{"errors" => [%{"field" => "price", "message" => "The Price is invalid."}]} =
+               json_response(conn, 422)
     end
   end
 

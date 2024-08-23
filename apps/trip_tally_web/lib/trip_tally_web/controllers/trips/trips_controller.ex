@@ -144,8 +144,9 @@ defmodule TripTallyWeb.Trips.TripsController do
   Returns: JSON array of trips starting today, or an empty array if none found.
   """
   def today(conn, _params, user) do
-    trip = TripTally.Trips.fetch_trip_starting_today(user.id)
-
-    render(conn, :show, trip: trip)
+    case TripTally.Trips.fetch_trip_starting_today(user.id) do
+      {:ok, trip} -> render(conn, :show, trip: trip)
+      error -> error
+    end
   end
 end

@@ -3,6 +3,7 @@ defmodule TripTally.Trips do
 
   import Ecto.Query, warn: false
 
+  alias TripTally.Money
   alias Ecto.Multi
   alias TripTally.Locations
   alias TripTally.Repo
@@ -18,12 +19,18 @@ defmodule TripTally.Trips do
     |> where([t], t.user_id == ^user_id and t.date_from == ^today)
     |> Repo.one()
     |> Repo.preload([:location, :expenses])
+    |> case do
+      nil -> {:error, :not_found}
+      trip -> {:ok, trip}
+    end
   end
 
   @doc """
   Creates a trip with a location obtained via `create_or_fetch_location`.
   """
   def create_trip_with_location(attrs) do
+    attrs = Money.create_price(attrs, "planned_cost")
+
     Multi.new()
     |> Multi.run(:location, fn _repo, _changes ->
       Locations.create_or_fetch_location(attrs)
@@ -81,17 +88,21 @@ defmodule TripTally.Trips do
   Update a trip by id and replace the attrs.
   """
   def update(id, attrs) do
-    Trip
-    |> Repo.get!(id)
-    |> Trip.changeset_update(attrs)
-    |> Repo.update()
-    |> case do
-      {:ok, trip} ->
-        trip = Repo.preload(trip, [:location, :expenses])
-        {:ok, trip}
+    with {:ok, trip} <- fetch_trip_by_id(id),
+         updated_attrs <- TripTally.Money.maybe_update_price(trip, attrs) do
+      trip
+      |> Trip.changeset_update(updated_attrs)
+      |> Repo.update()
+      |> case do
+        {:ok, trip} ->
+          trip = Repo.preload(trip, [:location, :expenses])
+          {:ok, trip}
 
-      {:error, changeset} ->
-        {:error, changeset}
+        {:error, changeset} ->
+          {:error, changeset}
+      end
+    else
+      _ -> {:error, :not_found}
     end
   end
 
