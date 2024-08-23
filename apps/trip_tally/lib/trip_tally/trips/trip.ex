@@ -8,15 +8,15 @@ defmodule TripTally.Trips.Trip do
 
   alias TripTally.Expenses.Expense
   alias TripTally.Repo
+  alias Money.Ecto.Composite.Type, as: MoneyType
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
-
   @derive {Jason.Encoder, except: [:__meta__, :location_id, :user]}
 
   schema "trips" do
     field :transport_type, :string
-    field :planned_cost, :float
+    field :planned_cost, MoneyType
     field :date_from, :date
     field :date_to, :date
 
@@ -28,7 +28,7 @@ defmodule TripTally.Trips.Trip do
     timestamps()
   end
 
-  @required_params ~w(transport_type planned_cost date_from date_to location_id user_id)a
+  @required_params ~w(transport_type date_from date_to planned_cost location_id user_id)a
   @update_params ~w(transport_type planned_cost date_from date_to)a
 
   def changeset(trip, attrs) do
@@ -37,6 +37,7 @@ defmodule TripTally.Trips.Trip do
     trip
     |> cast(attrs, @required_params)
     |> validate_required(@required_params)
+    |> validate_date_order()
     |> validate_dates_overlap()
   end
 
@@ -46,6 +47,7 @@ defmodule TripTally.Trips.Trip do
     trip
     |> cast(attrs, @update_params)
     |> validate_required(@update_params)
+    |> validate_date_order()
     |> validate_dates_overlap()
   end
 
@@ -55,13 +57,14 @@ defmodule TripTally.Trips.Trip do
     date_to = get_field(changeset, :date_to)
     trip_id = get_field(changeset, :id)
 
-    __MODULE__
-    |> where([t], t.user_id == ^user_id)
-    |> where([t], t.date_from <= ^date_to and t.date_to >= ^date_from)
-    |> exclude_current_trip(trip_id)
-    |> Repo.exists?()
-    |> case do
-      true -> add_error(changeset, :date_from, "Overlapping trip exists for the given dates")
+    overlapping_trips_query =
+      __MODULE__
+      |> where([t], t.user_id == ^user_id)
+      |> where([t], t.date_from < ^date_to and t.date_to > ^date_from)
+      |> exclude_current_trip(trip_id)
+
+    case Repo.exists?(overlapping_trips_query) do
+      true -> add_error(changeset, :date_from, "This trip overlaps with an existing trip.")
       false -> changeset
     end
   end
@@ -70,6 +73,17 @@ defmodule TripTally.Trips.Trip do
 
   defp exclude_current_trip(query, trip_id) do
     where(query, [t], t.id != ^trip_id)
+  end
+
+  defp validate_date_order(changeset) do
+    date_from = get_field(changeset, :date_from)
+    date_to = get_field(changeset, :date_to)
+
+    if Date.compare(date_from, date_to) != :lt do
+      add_error(changeset, :date_to, "The end date must be after the start date.")
+    else
+      changeset
+    end
   end
 
   defp normalize_dates(attrs) do
@@ -119,11 +133,8 @@ defmodule TripTally.Trips.Trip do
 
     Enum.find_value(formats, fn format ->
       case Timex.parse(date_string, format) do
-        {:ok, datetime} ->
-          {:ok, Timex.to_date(datetime)}
-
-        _ ->
-          nil
+        {:ok, datetime} -> {:ok, Timex.to_date(datetime)}
+        _ -> nil
       end
     end) || {:error, :invalid_format}
   end

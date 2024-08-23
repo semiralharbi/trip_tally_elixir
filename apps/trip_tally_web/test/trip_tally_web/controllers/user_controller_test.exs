@@ -57,13 +57,14 @@ defmodule TripTallyWeb.UserControllerTest do
       conn = post(conn, "/api/users/register", @user_invalid_attrs)
 
       assert %{
-               "errors" => %{
-                 "password" => [
-                   "at least one digit or punctuation character",
-                   "at least one upper case character",
-                   "should be at least 8 character(s)"
-                 ]
-               }
+               "errors" => [
+                 %{
+                   "field" => "password",
+                   "message" => "at least one digit or punctuation character"
+                 },
+                 %{"field" => "password", "message" => "at least one upper case character"},
+                 %{"field" => "password", "message" => "should be at least 8 character(s)"}
+               ]
              } = json_response(conn, 422)
     end
 
@@ -73,7 +74,9 @@ defmodule TripTallyWeb.UserControllerTest do
     } do
       attrs = %{email: email, password: password}
       conn = post(conn, "/api/users/register", attrs)
-      assert %{"errors" => %{"email" => ["has already been taken"]}} = json_response(conn, 422)
+
+      assert %{"errors" => [%{"field" => "email", "message" => "has already been taken"}]} =
+               json_response(conn, 422)
     end
   end
 
@@ -124,7 +127,14 @@ defmodule TripTallyWeb.UserControllerTest do
         "username" => "TestUsername"
       }
 
-      assert %{"errors" => %{"default_currency_code" => ["should be at most 3 character(s)"]}} ==
+      assert %{
+               "errors" => [
+                 %{
+                   "field" => "default_currency_code",
+                   "message" => "should be at most 3 character(s)"
+                 }
+               ]
+             } ==
                conn
                |> put("/api/users/update_profile", attrs)
                |> json_response(422)
@@ -137,7 +147,11 @@ defmodule TripTallyWeb.UserControllerTest do
         "username" => "TestUsername"
       }
 
-      assert %{"errors" => %{"country" => ["should be at most 60 character(s)"]}} ==
+      assert %{
+               "errors" => [
+                 %{"field" => "country", "message" => "should be at most 60 character(s)"}
+               ]
+             } ==
                conn
                |> put("/api/users/update_profile", attrs)
                |> json_response(422)
@@ -150,7 +164,11 @@ defmodule TripTallyWeb.UserControllerTest do
         "username" => "TestUsernameTestUsernameTestUsernameTestUsernameTestUsername"
       }
 
-      assert %{"errors" => %{"username" => ["should be at most 20 character(s)"]}} ==
+      assert %{
+               "errors" => [
+                 %{"field" => "username", "message" => "should be at most 20 character(s)"}
+               ]
+             } ==
                conn
                |> put("/api/users/update_profile", attrs)
                |> json_response(422)

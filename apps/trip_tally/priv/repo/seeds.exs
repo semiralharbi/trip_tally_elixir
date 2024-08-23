@@ -1,46 +1,48 @@
-# Script for populating the database. You can run it as:
-#
-#     mix run priv/repo/seeds.exs
-#
-# Inside the script, you can read and write to any of your
-# repositories directly:
-#
-#     TripTally.Repo.insert!(%TripTally.SomeSchema{})
-#
-# We recommend using the bang functions (`insert!`, `update!`
-# and so on) as they will fail if something goes wrong.
 alias TripTally.Expenses.Expense
 alias TripTally.Repo
 alias TripTally.Accounts.User
 alias TripTally.Trips.Locations
 alias TripTally.Trips.Trip
 
+unique_user_email = fn -> "user#{UUID.uuid1()}@example.com" end
 # Users
-user1 =
-  Repo.get_by(User, email: "user@example.com") ||
-    %User{email: "user1@example.com", hashed_password: "Password2@"} |> Repo.insert!()
+user1 = %User{email: unique_user_email.(), hashed_password: "Password2@"} |> Repo.insert!()
 
 user2 =
-  Repo.get_by(User, email: "user@example.com") ||
-    %User{email: "user2@example.com", hashed_password: "Password2@"} |> Repo.insert!()
+  case Repo.get_by(User, email: "user2@example.com") do
+    nil -> %User{email: "user2@example.com", hashed_password: "Password2@"} |> Repo.insert!()
+    user -> user
+  end
 
 # Locations
 location1 =
-  %Locations{country_code: "US", city_name: "New York", user_id: user1.id}
-  |> Locations.changeset(%{})
-  |> Repo.insert!()
+  case Repo.get_by(Locations, country_code: "US", city_name: "New York") do
+    nil ->
+      %Locations{country_code: "US", city_name: "New York", user_id: user1.id}
+      |> Locations.changeset(%{})
+      |> Repo.insert!()
+
+    location ->
+      location
+  end
 
 location2 =
-  %Locations{country_code: "FR", city_name: "Paris", user_id: user2.id}
-  |> Locations.changeset(%{})
-  |> Repo.insert!()
+  case Repo.get_by(Locations, country_code: "FR", city_name: "Paris") do
+    nil ->
+      %Locations{country_code: "FR", city_name: "Paris", user_id: user2.id}
+      |> Locations.changeset(%{})
+      |> Repo.insert!()
+
+    location ->
+      location
+  end
 
 # Trips
 trip1 =
   %Trip{
     transport_type: "Plane",
-    planned_cost: 1200.0,
-    date_from: ~D[2024-04-01],
+    planned_cost: Money.new(120_000, :USD),
+    date_from: Timex.to_date(Timex.now()),
     date_to: ~D[2024-04-10],
     location_id: location1.id,
     user_id: user1.id
@@ -51,7 +53,7 @@ trip1 =
 _trip2 =
   %Trip{
     transport_type: "Train",
-    planned_cost: 300.0,
+    planned_cost: Money.new(30_000, :EUR),
     date_from: ~D[2024-05-15],
     date_to: ~D[2024-05-20],
     location_id: location2.id,

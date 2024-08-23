@@ -11,26 +11,32 @@ defmodule TripTally.TripsTest do
       trip = insert(:trip, %{date_from: Timex.now()})
       insert_list(4, :expense, %{user_id: trip.user_id, trip_id: trip.id})
 
-      assert %TripTally.Trips.Trip{
-               date_from: ~D[2024-08-22],
-               date_to: ~D[2024-01-05],
-               location: %TripTally.Trips.Locations{
-                 city_name: "New York",
-                 country_code: "US"
-               },
-               planned_cost: 100.0,
-               transport_type: "Bus",
-               expenses: expenses
-             } = Trips.fetch_trip_starting_today(trip.user_id)
+      assert {:ok,
+              %TripTally.Trips.Trip{
+                date_to: ~D[2024-01-05],
+                location: %TripTally.Trips.Locations{
+                  city_name: "New York",
+                  country_code: "US"
+                },
+                planned_cost: %Money{amount: 1000, currency: :USD},
+                transport_type: "Bus",
+                expenses: expenses
+              }} = Trips.fetch_trip_starting_today(trip.user_id)
 
       assert length(expenses) == 4
     end
 
     test "creates trip with location successfully" do
-      location_attrs = %{"country_code" => "PL", "city_name" => "Bydgoszcz"}
+      additional_attrs = %{
+        "country_code" => "PL",
+        "city_name" => "Bydgoszcz",
+        "amount" => 350_00,
+        "currency" => "EUR"
+      }
 
       attrs =
-        string_params_for(:trip, location_attrs)
+        string_params_for(:trip, additional_attrs)
+        |> Map.delete("planned_cost")
 
       {:ok, trip} = Trips.create_trip_with_location(attrs)
       assert trip.location.country_code == "PL"
@@ -69,16 +75,15 @@ defmodule TripTally.TripsTest do
 
     test "updates trip successfully" do
       trip = insert(:trip)
-      new_attrs = %{"planned_cost" => 200}
+      new_attrs = %{"amount" => 350_00, "currency" => "EUR"}
       assert {:ok, updated_trip} = Trips.update(trip.id, new_attrs)
-      assert updated_trip.planned_cost == 200
+      assert updated_trip.planned_cost == %Money{amount: 35000, currency: :EUR}
       assert trip.planned_cost != updated_trip.planned_cost
     end
 
     test "updates non-existent trip" do
-      assert_raise Ecto.NoResultsError, fn ->
-        Trips.update(@invalid_trip_id, %{"planned_cost" => 200})
-      end
+      assert {:error, :not_found} =
+               Trips.update(@invalid_trip_id, %{"amount" => 350_00, "currency" => "EUR"})
     end
 
     test "deletes trip successfully" do
@@ -113,23 +118,26 @@ defmodule TripTally.TripsTest do
     test "handles planned cost formats correctly" do
       trip = insert(:trip)
 
-      new_attrs1 = %{"planned_cost" => "300"}
+      new_attrs1 = %{"amount" => "350", "currency" => "EUR"}
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
-      assert updated_trip1.planned_cost == 300.0
+      assert updated_trip1.planned_cost.amount == 350
 
-      new_attrs2 = %{"planned_cost" => 400}
+      new_attrs2 = %{"amount" => 350_00, "currency" => "EUR"}
       assert {:ok, updated_trip2} = Trips.update(trip.id, new_attrs2)
-      assert updated_trip2.planned_cost == 400.0
+      assert updated_trip2.planned_cost.amount == 35000
 
-      new_attrs3 = %{"planned_cost" => 400.0}
+      new_attrs3 = %{"amount" => 350.0, "currency" => "EUR"}
       assert {:ok, updated_trip3} = Trips.update(trip.id, new_attrs3)
-      assert updated_trip3.planned_cost == 400.0
+      assert updated_trip3.planned_cost.amount == 35000
 
-      new_attrs4 = %{"planned_cost" => "invalid_cost"}
+      new_attrs4 = %{"amount" => nil, "currency" => "EUR"}
       assert {:error, changeset} = Trips.update(trip.id, new_attrs4)
 
       assert changeset.errors ==
-               [planned_cost: {"is invalid", [type: :float, validation: :cast]}]
+               [
+                 planned_cost:
+                   {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
+               ]
     end
   end
 end
