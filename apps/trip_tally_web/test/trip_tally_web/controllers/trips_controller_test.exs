@@ -9,6 +9,8 @@ defmodule TripTallyWeb.TripsControllerTest do
     "transport_type" => nil,
     "amount" => nil,
     "currency" => nil,
+    "amount" => nil,
+    "currency" => nil,
     "date_from" => ~D[2024-04-01],
     "date_to" => ~D[2024-04-10],
     "country_code" => "PL",
@@ -91,6 +93,13 @@ defmodule TripTallyWeb.TripsControllerTest do
                    "message" => "The Transport type cannot be blank."
                  }
                ]
+               "errors" => [
+                 %{"field" => "planned_cost", "message" => "The Planned cost cannot be blank."},
+                 %{
+                   "field" => "transport_type",
+                   "message" => "The Transport type cannot be blank."
+                 }
+               ]
              } = json_response(conn, 422)
     end
 
@@ -98,6 +107,10 @@ defmodule TripTallyWeb.TripsControllerTest do
       conn = post(conn, "/api/trips", @invalid_attrs_no_country)
 
       assert %{
+               "errors" => [
+                 %{"field" => "city_name", "message" => "The City name cannot be blank."},
+                 %{"field" => "country_code", "message" => "The Country code cannot be blank."}
+               ]
                "errors" => [
                  %{"field" => "city_name", "message" => "The City name cannot be blank."},
                  %{"field" => "country_code", "message" => "The Country code cannot be blank."}
@@ -136,6 +149,15 @@ defmodule TripTallyWeb.TripsControllerTest do
 
       conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @invalid_attrs})
 
+      assert %{
+               "errors" => [
+                 %{"field" => "planned_cost", "message" => "The Planned cost is invalid."},
+                 %{
+                   "field" => "transport_type",
+                   "message" => "The Transport type cannot be blank."
+                 }
+               ]
+             } == json_response(conn, 422)
       assert %{
                "errors" => [
                  %{"field" => "planned_cost", "message" => "The Planned cost is invalid."},

@@ -53,6 +53,9 @@ defmodule TripTally.TripsTest do
         string_params_for(:trip, additional_attrs)
         |> Map.delete("planned_cost")
 
+      string_params_for(:trip, additional_attrs)
+      |> Map.delete("planned_cost")
+
       {:ok, trip} = Trips.create_trip_with_location(attrs)
       assert trip.location.country_code == "PL"
       assert trip.location.city_name == "Bydgoszcz"
@@ -134,7 +137,9 @@ defmodule TripTally.TripsTest do
       trip = insert(:trip)
 
       new_attrs1 = %{"amount" => "350", "currency" => "EUR"}
+      new_attrs1 = %{"amount" => "350", "currency" => "EUR"}
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
+      assert updated_trip1.planned_cost.amount == 350
       assert updated_trip1.planned_cost.amount == 350
 
       new_attrs2 = %{"amount" => 35_000, "currency" => "EUR"}
@@ -142,9 +147,11 @@ defmodule TripTally.TripsTest do
       assert updated_trip2.planned_cost.amount == 35_000
 
       new_attrs3 = %{"amount" => 350.0, "currency" => "EUR"}
+      new_attrs3 = %{"amount" => 350.0, "currency" => "EUR"}
       assert {:ok, updated_trip3} = Trips.update(trip.id, new_attrs3)
       assert updated_trip3.planned_cost.amount == 35_000
 
+      new_attrs4 = %{"amount" => nil, "currency" => "EUR"}
       new_attrs4 = %{"amount" => nil, "currency" => "EUR"}
       assert {:error, changeset} = Trips.update(trip.id, new_attrs4)
 
@@ -153,6 +160,10 @@ defmodule TripTally.TripsTest do
                  planned_cost:
                    {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
                ]
+
+      [
+        planned_cost: {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
+      ]
     end
   end
 end

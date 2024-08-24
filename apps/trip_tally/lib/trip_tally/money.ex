@@ -3,6 +3,7 @@ defmodule TripTally.Money do
   This module holds helpers for Money
   """
 
+  alias TripTally.Trips.Trip
   alias TripTally.Expenses.Expense
   alias TripTally.Trips.Trip
 
