@@ -5,12 +5,22 @@ defmodule TripTally.Money do
 
   alias TripTally.Trips.Trip
   alias TripTally.Expenses.Expense
+  alias TripTally.Trips.Trip
 
   def create_price(attrs, price_field) do
     amount =
       case Map.get(attrs, "amount") do
-        amount when is_binary(amount) -> String.to_integer(amount)
-        amount -> amount
+        amount when is_binary(amount) ->
+          String.to_integer(amount) |> Kernel.*(100) |> round()
+
+        amount when is_float(amount) ->
+          amount |> Kernel.*(100) |> round()
+
+        amount when is_integer(amount) ->
+          amount |> Kernel.*(100) |> round()
+
+        _ ->
+          nil
       end
 
     currency = Map.get(attrs, "currency")

@@ -6,6 +6,7 @@ defmodule TripTally.Trips do
   alias TripTally.Money
   alias Ecto.Multi
   alias TripTally.Locations
+  alias TripTally.Money
   alias TripTally.Repo
   alias TripTally.Trips.Trip
 
