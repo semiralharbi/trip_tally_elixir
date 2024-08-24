@@ -137,7 +137,6 @@ defmodule TripTally.TripsTest do
       trip = insert(:trip)
 
       new_attrs1 = %{"amount" => "350", "currency" => "EUR"}
-      new_attrs1 = %{"amount" => "350", "currency" => "EUR"}
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
       assert updated_trip1.planned_cost.amount == 350
       assert updated_trip1.planned_cost.amount == 350
@@ -147,11 +146,9 @@ defmodule TripTally.TripsTest do
       assert updated_trip2.planned_cost.amount == 35_000
 
       new_attrs3 = %{"amount" => 350.0, "currency" => "EUR"}
-      new_attrs3 = %{"amount" => 350.0, "currency" => "EUR"}
       assert {:ok, updated_trip3} = Trips.update(trip.id, new_attrs3)
       assert updated_trip3.planned_cost.amount == 35_000
 
-      new_attrs4 = %{"amount" => nil, "currency" => "EUR"}
       new_attrs4 = %{"amount" => nil, "currency" => "EUR"}
       assert {:error, changeset} = Trips.update(trip.id, new_attrs4)
 
