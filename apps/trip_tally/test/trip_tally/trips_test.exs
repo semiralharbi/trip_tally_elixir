@@ -18,7 +18,7 @@ defmodule TripTally.TripsTest do
                   city_name: "New York",
                   country_code: "US"
                 },
-                planned_cost: %Money{amount: 1000, currency: :USD},
+                planned_cost: %Money{amount: 100_000, currency: :USD},
                 transport_type: "Bus",
                 expenses: expenses
               }} = Trips.fetch_trip_starting_today(trip.user_id)
@@ -30,7 +30,22 @@ defmodule TripTally.TripsTest do
       additional_attrs = %{
         "country_code" => "PL",
         "city_name" => "Bydgoszcz",
-        "amount" => 350_00,
+        "amount" => 350.00,
+        "currency" => "EUR"
+      }
+
+      attrs =
+        string_params_for(:trip, additional_attrs)
+        |> Map.delete("planned_cost")
+
+      {:ok, trip} = Trips.create_trip_with_location(attrs)
+      assert trip.location.country_code == "PL"
+      assert trip.location.city_name == "Bydgoszcz"
+
+      additional_attrs = %{
+        "country_code" => "PL",
+        "city_name" => "Bydgoszcz",
+        "amount" => 350.68,
         "currency" => "EUR"
       }
 
@@ -75,15 +90,15 @@ defmodule TripTally.TripsTest do
 
     test "updates trip successfully" do
       trip = insert(:trip)
-      new_attrs = %{"amount" => 350_00, "currency" => "EUR"}
+      new_attrs = %{"amount" => 35_000, "currency" => "EUR"}
       assert {:ok, updated_trip} = Trips.update(trip.id, new_attrs)
-      assert updated_trip.planned_cost == %Money{amount: 35000, currency: :EUR}
+      assert updated_trip.planned_cost == %Money{amount: 35_000, currency: :EUR}
       assert trip.planned_cost != updated_trip.planned_cost
     end
 
     test "updates non-existent trip" do
       assert {:error, :not_found} =
-               Trips.update(@invalid_trip_id, %{"amount" => 350_00, "currency" => "EUR"})
+               Trips.update(@invalid_trip_id, %{"amount" => 35_000, "currency" => "EUR"})
     end
 
     test "deletes trip successfully" do
@@ -122,13 +137,13 @@ defmodule TripTally.TripsTest do
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
       assert updated_trip1.planned_cost.amount == 350
 
-      new_attrs2 = %{"amount" => 350_00, "currency" => "EUR"}
+      new_attrs2 = %{"amount" => 35_000, "currency" => "EUR"}
       assert {:ok, updated_trip2} = Trips.update(trip.id, new_attrs2)
-      assert updated_trip2.planned_cost.amount == 35000
+      assert updated_trip2.planned_cost.amount == 35_000
 
       new_attrs3 = %{"amount" => 350.0, "currency" => "EUR"}
       assert {:ok, updated_trip3} = Trips.update(trip.id, new_attrs3)
-      assert updated_trip3.planned_cost.amount == 35000
+      assert updated_trip3.planned_cost.amount == 35_000
 
       new_attrs4 = %{"amount" => nil, "currency" => "EUR"}
       assert {:error, changeset} = Trips.update(trip.id, new_attrs4)

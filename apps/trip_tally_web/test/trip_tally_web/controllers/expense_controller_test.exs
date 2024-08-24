@@ -45,7 +45,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
     } do
       attrs = %{
         "name" => "Hotel",
-        "amount" => 10_000,
+        "amount" => 1000.0,
         "currency" => "USD",
         "date" => ~D[2024-04-30],
         "trip_id" => trip_id
@@ -54,12 +54,13 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       conn = post(conn, "/api/expenses", attrs)
 
       assert %{
-               "trip_id" => ^trip_id,
-               "user_id" => ^user_id,
-               "name" => "Hotel",
-               "amount" => 10_000,
-               "currency" => "USD",
-               "date" => "2024-04-30"
+               "expense" => %{
+                 "trip_id" => ^trip_id,
+                 "user_id" => ^user_id,
+                 "name" => "Hotel",
+                 "price" => %{"amount" => 1000.0, "currency" => "USD"},
+                 "date" => "2024-04-30"
+               }
              } = json_response(conn, 201)
     end
 
@@ -92,11 +93,12 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       conn = get(conn, "/api/expenses/#{expense_id}")
 
       assert %{
-               "name" => "Test Expense",
-               "currency" => "USD",
-               "amount" => 1000,
-               "user_id" => ^user_id,
-               "id" => ^expense_id
+               "expense" => %{
+                 "name" => "Test Expense",
+                 "price" => %{"amount" => 100.0, "currency" => "USD"},
+                 "user_id" => ^user_id,
+                 "id" => ^expense_id
+               }
              } = json_response(conn, 200)
     end
 
@@ -124,11 +126,12 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       conn = put(conn, "/api/expenses/#{expense_id}", update_attrs)
 
       assert %{
-               "name" => "Updated Breakfast",
-               "currency" => "USD",
-               "amount" => 1000,
-               "user_id" => ^user_id,
-               "id" => ^expense_id
+               "expense" => %{
+                 "name" => "Updated Breakfast",
+                 "price" => %{"amount" => 100.0, "currency" => "USD"},
+                 "user_id" => ^user_id,
+                 "id" => ^expense_id
+               }
              } = json_response(conn, 200)
     end
 

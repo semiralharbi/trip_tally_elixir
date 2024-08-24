@@ -43,7 +43,7 @@ defmodule TripTally.Factory do
 
     %Trip{
       transport_type: "Bus",
-      planned_cost: Money.new(1000, :USD),
+      planned_cost: Money.new(100_000, :USD),
       date_from: ~D[2024-01-01],
       date_to: ~D[2024-01-05],
       user_id: user.id,
@@ -57,7 +57,7 @@ defmodule TripTally.Factory do
     %Expense{
       name: "Test Expense",
       date: ~D[2024-01-15],
-      price: Money.new(1000, :USD),
+      price: Money.new(10_000, :USD),
       trip_id: insert(:trip).id,
       user_id: insert(:user).id
     }

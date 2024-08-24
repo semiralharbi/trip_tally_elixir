@@ -29,13 +29,13 @@ defmodule TripTally.ExpensesTest do
     test "create/1 creates an expense successfully" do
       attrs =
         string_params_for(:expense)
-        |> merge_attributes(%{"currency" => "USD", "amount" => 12_050})
+        |> merge_attributes(%{"currency" => "USD", "amount" => 12.05})
         |> Map.delete("price")
 
       assert {:ok,
               %{
                 name: "Test Expense",
-                price: %{amount: 12_050, currency: :USD},
+                price: %{amount: 1205, currency: :USD},
                 date: ~D[2024-01-15]
               }} =
                Expenses.create(attrs)
