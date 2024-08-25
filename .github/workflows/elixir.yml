@@ -29,6 +29,11 @@ jobs:
           restore-keys: ${{ runner.os }}-mix-
       - name: Install dependencies
         run: mix deps.get
+      - name: Save Elixir setup and dependencies
+        uses: actions/upload-artifact@v3
+        with:
+          name: elixir-setup
+          path: .
 
   credo:
     name: Credo Linting
@@ -36,12 +41,11 @@ jobs:
     needs: setup
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Elixir
-        uses: erlef/setup-beam@61e01a43a562a89bfc54c7f9a378ff67b03e4a21
+      - name: Download Elixir setup and dependencies
+        uses: actions/download-artifact@v3
         with:
-          elixir-version: "1.16.2" # Elixir version:
-          otp-version: "26.0" # OTP version:
+          name: elixir-setup
+          path: .
       - name: Run Credo
         run: mix credo
 
@@ -51,12 +55,11 @@ jobs:
     needs: setup
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Elixir
-        uses: erlef/setup-beam@61e01a43a562a89bfc54c7f9a378ff67b03e4a21
+      - name: Download Elixir setup and dependencies
+        uses: actions/download-artifact@v3
         with:
-          elixir-version: "1.16.2" # Elixir version:
-          otp-version: "26.0" # OTP version:
+          name: elixir-setup
+          path: .
       - name: Check Elixir formatting
         run: mix format --check-formatted
 
@@ -81,12 +84,11 @@ jobs:
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Elixir
-        uses: erlef/setup-beam@61e01a43a562a89bfc54c7f9a378ff67b03e4a21
+      - name: Download Elixir setup and dependencies
+        uses: actions/download-artifact@v3
         with:
-          elixir-version: "1.16.2" # Elixir version:
-          otp-version: "26.0" # OTP version:
+          name: elixir-setup
+          path: .
       - name: Wait for Postgres to be ready
         run: until pg_isready -h localhost -p 5432 -U postgres; do echo "Waiting for postgres..."; sleep 1; done
       - name: Run tests
