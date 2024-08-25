@@ -15,6 +15,7 @@ permissions:
   contents: read
 
 jobs:
+  MIX_ENV: test
   build:
     name: Build and test
     runs-on: ubuntu-latest
@@ -39,4 +40,7 @@ jobs:
       - name: Check Elixir formatting
         run: mix format --check-formatted
       - name: Run tests
-        run: mix test
+        run: |
+          mix ecto.create
+          mix ecto.migrate
+          mix test
