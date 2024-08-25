@@ -67,14 +67,15 @@ defmodule TripTallyWeb.ExpenseControllerTest do
     test "renders errors when data is invalid", %{conn: conn} do
       invalid_attrs = %{"name" => "", "amount" => nil, "currency" => ""}
       conn = post(conn, "/api/expenses", invalid_attrs)
+      response = json_response(conn, 422)
 
-      assert %{
-               "errors" => [
-                 %{"field" => "date", "message" => "The Date cannot be blank."},
-                 %{"field" => "trip_id", "message" => "The Trip id cannot be blank."},
-                 %{"field" => "price", "message" => "The Price cannot be blank."}
-               ]
-             } = json_response(conn, 422)
+      expected_errors = [
+        %{"field" => "date", "message" => "The Date cannot be blank."},
+        %{"field" => "trip_id", "message" => "The Trip id cannot be blank."},
+        %{"field" => "price", "message" => "The Price cannot be blank."}
+      ]
+
+      assert Enum.sort(response["errors"]) == Enum.sort(expected_errors)
     end
   end
 

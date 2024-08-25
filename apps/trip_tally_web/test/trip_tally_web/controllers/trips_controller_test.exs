@@ -96,13 +96,14 @@ defmodule TripTallyWeb.TripsControllerTest do
 
     test "renders errors when country_code and city_name is invalid", %{conn: conn} do
       conn = post(conn, "/api/trips", @invalid_attrs_no_country)
+      response = json_response(conn, 422)
 
-      assert %{
-               "errors" => [
-                 %{"field" => "city_name", "message" => "The City name cannot be blank."},
-                 %{"field" => "country_code", "message" => "The Country code cannot be blank."}
-               ]
-             } = json_response(conn, 422)
+      expected_errors = [
+        %{"field" => "city_name", "message" => "The City name cannot be blank."},
+        %{"field" => "country_code", "message" => "The Country code cannot be blank."}
+      ]
+
+      assert Enum.sort(response["errors"]) == Enum.sort(expected_errors)
     end
   end
 
