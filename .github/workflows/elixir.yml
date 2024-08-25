@@ -19,6 +19,7 @@ jobs:
         uses: ./.github/actions/setup-elixir
         with:
           elixir-version: "1.16.2"
+          otp-version: "26.0"
       - name: Run Credo
         uses: ./.github/actions/run-credo
         with:
@@ -33,6 +34,7 @@ jobs:
         uses: ./.github/actions/setup-elixir
         with:
           elixir-version: "1.16.2"
+          otp-version: "26.0"
       - name: Check Formatting
         uses: ./.github/actions/format-check
         with:
@@ -62,6 +64,7 @@ jobs:
         uses: ./.github/actions/setup-elixir
         with:
           elixir-version: "1.16.2"
+          otp-version: "26.0"
       - name: Run Tests
         uses: ./.github/actions/run-tests
         with:

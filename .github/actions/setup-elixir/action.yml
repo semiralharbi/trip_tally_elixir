@@ -4,6 +4,9 @@ inputs:
   elixir-version:
     description: "The version of Elixir to use"
     required: true
+  otp-version:
+    description: "The version of OTP to use"
+    required: true
 runs:
   using: "composite"
   steps:
@@ -12,3 +15,4 @@ runs:
       uses: erlef/setup-beam@v1
       with:
         elixir-version: ${{ inputs.elixir-version }}
+        otp-version: ${{ inputs.otp-version }}
