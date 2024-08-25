@@ -43,7 +43,7 @@ trip1 =
     transport_type: "Plane",
     planned_cost: Money.new(120_000, :USD),
     date_from: Timex.to_date(Timex.now()),
-    date_to: ~D[2024-04-10],
+    date_to: ~D[2028-04-10],
     location_id: location1.id,
     user_id: user1.id
   }
