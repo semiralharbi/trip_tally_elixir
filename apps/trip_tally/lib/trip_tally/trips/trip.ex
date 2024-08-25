@@ -9,7 +9,6 @@ defmodule TripTally.Trips.Trip do
   alias Money.Ecto.Composite.Type, as: MoneyType
   alias TripTally.Expenses.Expense
   alias TripTally.Repo
-  alias Money.Ecto.Composite.Type, as: MoneyType
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id

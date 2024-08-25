@@ -1,0 +1,55 @@
+name: "Run Tests"
+description: "Runs the test suite for the Elixir application"
+inputs:
+  elixir-version:
+    description: "The version of Elixir to use"
+    required: true
+    default: "1.16.2"
+  otp-version:
+    description: "The version of OTP to use"
+    required: true
+    default: "26.0"
+  postgres-host:
+    description: "Postgres host"
+    required: true
+    default: "localhost"
+  postgres-port:
+    description: "Postgres port"
+    required: true
+    default: "5432"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ inputs.elixir-version }}
+        otp-version: ${{ inputs.otp-version }}
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    - name: Install dependencies
+      run: mix deps.get
+      shell: bash
+    - name: Wait for Postgres to be ready
+      run: |
+        until pg_isready -h ${{ inputs.postgres-host }} -p ${{ inputs.postgres-port }} -U postgres; do
+          echo "Waiting for postgres...";
+          sleep 1;
+        done
+      shell: bash
+    - name: Run tests
+      run: |
+        mix ecto.create
+        mix ecto.migrate
+        mix test
+      shell: bash
+      env:
+        MIX_ENV: test
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+        DB_HOST: ${{ inputs.postgres-host }}
+        DB_NAME: triptally_test

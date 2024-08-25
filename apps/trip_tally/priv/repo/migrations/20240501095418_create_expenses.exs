@@ -7,8 +7,8 @@ defmodule TripTally.Repo.Migrations.CreateExpenses do
       add :name, :string
       add :price, :money_with_currency
       add :date, :date
-      add :trip_id, references(:trips, on_delete: :delete, type: :binary_id)
-      add :user_id, references(:users, on_delete: :delete, type: :binary_id)
+      add :trip_id, references(:trips, on_delete: :delete_all, type: :binary_id)
+      add :user_id, references(:users, on_delete: :delete_all, type: :binary_id)
 
       timestamps()
     end

@@ -13,7 +13,6 @@ defmodule TripTally.Expenses.Expense do
     field :name, :string
     field :date, :date
     field :price, Money.Ecto.Composite.Type
-    ## TODO: Add expense_category
 
     belongs_to :trip, TripTally.Trips.Trip, type: :binary_id, foreign_key: :trip_id
     belongs_to :user, TripTally.Accounts.User, type: :binary_id, foreign_key: :user_id

@@ -1,0 +1,73 @@
+name: Elixir CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+jobs:
+  credo:
+    name: Credo Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Elixir
+        uses: ./.github/actions/setup-elixir
+        with:
+          elixir-version: "1.16.2"
+          otp-version: "26.0"
+      - name: Run Credo
+        uses: ./.github/actions/run-credo
+        with:
+          elixir-version: "1.16.2"
+
+  formatting:
+    name: Check Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Elixir
+        uses: ./.github/actions/setup-elixir
+        with:
+          elixir-version: "1.16.2"
+          otp-version: "26.0"
+      - name: Check Formatting
+        uses: ./.github/actions/format-check
+        with:
+          elixir-version: "1.16.2"
+
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: triptally_test
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Elixir
+        uses: ./.github/actions/setup-elixir
+        with:
+          elixir-version: "1.16.2"
+          otp-version: "26.0"
+      - name: Run Tests
+        uses: ./.github/actions/run-tests
+        with:
+          elixir-version: "1.16.2"
+          postgres-host: "localhost"
+          postgres-port: "5432"

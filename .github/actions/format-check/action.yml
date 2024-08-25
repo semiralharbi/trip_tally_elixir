@@ -1,0 +1,31 @@
+name: "Check Formatting"
+description: "Checks if the Elixir code is formatted correctly"
+inputs:
+  elixir-version:
+    description: "The version of Elixir to use"
+    required: true
+    default: "1.16.2"
+  otp-version:
+    description: "The version of OTP to use"
+    required: true
+    default: "26.0"
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ inputs.elixir-version }}
+        otp-version: ${{ inputs.otp-version }}
+    - name: Restore dependencies cache
+      uses: actions/cache@v3
+      with:
+        path: deps
+        key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+        restore-keys: ${{ runner.os }}-mix-
+    - name: Install dependencies
+      run: mix deps.get
+      shell: bash
+    - name: Check formatting
+      run: mix format --check-formatted
+      shell: bash
