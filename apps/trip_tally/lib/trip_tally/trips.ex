@@ -3,7 +3,6 @@ defmodule TripTally.Trips do
 
   import Ecto.Query, warn: false
 
-  alias TripTally.Money
   alias Ecto.Multi
   alias TripTally.Locations
   alias TripTally.Money
