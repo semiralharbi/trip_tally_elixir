@@ -14,6 +14,10 @@ jobs:
     name: Credo Linting
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Elixir
+        uses: ./.github/actions/setup-elixir
+        with:
+          elixir-version: "1.16.2"
       - name: Run Credo
         uses: ./.github/actions/run-credo
         with:
@@ -23,6 +27,10 @@ jobs:
     name: Check Formatting
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Elixir
+        uses: ./.github/actions/setup-elixir
+        with:
+          elixir-version: "1.16.2"
       - name: Check Formatting
         uses: ./.github/actions/format-check
         with:
@@ -47,6 +55,10 @@ jobs:
           --health-retries=5
 
     steps:
+      - name: Setup Elixir
+        uses: ./.github/actions/setup-elixir
+        with:
+          elixir-version: "1.16.2"
       - name: Run Tests
         uses: ./.github/actions/run-tests
         with:

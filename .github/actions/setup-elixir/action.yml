@@ -1,0 +1,14 @@
+name: "Setup Elixir Environment"
+description: "Checks out the code and sets up the Elixir environment"
+inputs:
+  elixir-version:
+    description: "The version of Elixir to use"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+    - name: Set up Elixir
+      uses: erlef/setup-beam@v1
+      with:
+        elixir-version: ${{ inputs.elixir-version }}
