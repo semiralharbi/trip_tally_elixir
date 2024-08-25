@@ -12,6 +12,7 @@ runs:
       uses: erlef/setup-beam@v1
       with:
         elixir-version: ${{ inputs.elixir-version }}
+        otp-version: ${{ inputs.otp-version }}
     - name: Restore dependencies cache
       uses: actions/cache@v3
       with:
@@ -20,5 +21,7 @@ runs:
         restore-keys: ${{ runner.os }}-mix-
     - name: Install dependencies
       run: mix deps.get
+      shell: bash
     - name: Run Credo
       run: mix credo
+      shell: bash

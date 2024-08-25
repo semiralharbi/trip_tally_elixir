@@ -5,6 +5,10 @@ inputs:
     description: "The version of Elixir to use"
     required: true
     default: "1.16.2"
+  otp-version:
+    description: "The version of OTP to use"
+    required: true
+    default: "26.0"
   postgres-host:
     description: "Postgres host"
     required: true
@@ -20,6 +24,7 @@ runs:
       uses: erlef/setup-beam@v1
       with:
         elixir-version: ${{ inputs.elixir-version }}
+        otp-version: ${{ inputs.otp-version }}
     - name: Restore dependencies cache
       uses: actions/cache@v3
       with:
@@ -28,17 +33,20 @@ runs:
         restore-keys: ${{ runner.os }}-mix-
     - name: Install dependencies
       run: mix deps.get
+      shell: bash
     - name: Wait for Postgres to be ready
       run: |
         until pg_isready -h ${{ inputs.postgres-host }} -p ${{ inputs.postgres-port }} -U postgres; do
           echo "Waiting for postgres...";
           sleep 1;
         done
+      shell: bash
     - name: Run tests
       run: |
         mix ecto.create
         mix ecto.migrate
         mix test
+      shell: bash
       env:
         MIX_ENV: test
         DB_USERNAME: postgres
