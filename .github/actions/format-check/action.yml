@@ -5,6 +5,10 @@ inputs:
     description: "The version of Elixir to use"
     required: true
     default: "1.16.2"
+  otp-version:
+    description: "The version of OTP to use"
+    required: true
+    default: "26.0"
 runs:
   using: "composite"
   steps:
