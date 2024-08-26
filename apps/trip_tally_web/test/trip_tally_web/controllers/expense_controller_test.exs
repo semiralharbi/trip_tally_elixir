@@ -54,6 +54,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
         "name" => "Hotel",
         "amount" => 1000.0,
         "currency" => "USD",
+        "category" => "activities",
         "date" => ~D[2024-04-30],
         "trip_id" => trip_id
       }
@@ -77,6 +78,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       response = json_response(conn, 422)
 
       expected_errors = [
+        %{"field" => "category", "message" => "The Category cannot be blank."},
         %{"field" => "date", "message" => "The Date cannot be blank."},
         %{"field" => "trip_id", "message" => "The Trip id cannot be blank."},
         %{"field" => "price", "message" => "The Price cannot be blank."}
