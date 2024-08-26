@@ -29,6 +29,13 @@ defmodule TripTally.Expenses do
   end
 
   @doc """
+  Gets all expense categories.
+  """
+  def get_all_expense_categories do
+    Expense.categories()
+  end
+
+  @doc """
   Gets single expense by id.
   """
   def get_expense(id, user_id) do

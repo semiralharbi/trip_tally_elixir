@@ -28,5 +28,6 @@ defmodule TripTallyWeb.Router do
     resources "/trips", Trips.TripsController, except: [:new, :edit]
 
     resources "/expenses", Expenses.ExpenseController, except: [:new, :edit]
+    get "/categories", Expenses.ExpenseController, :categories
   end
 end

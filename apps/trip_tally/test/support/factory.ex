@@ -57,6 +57,7 @@ defmodule TripTally.Factory do
     %Expense{
       name: "Test Expense",
       date: ~D[2024-01-15],
+      category: :activities,
       price: Money.new(10_000, :USD),
       trip_id: insert(:trip).id,
       user_id: insert(:user).id
