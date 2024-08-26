@@ -47,7 +47,8 @@ defmodule TripTally.MixProject do
       {:money, "~> 1.12.4"},
       {:timex, "~> 3.7.11"},
       {:mogrify, "~> 0.9.3"},
-      {:ex_machina, "~> 2.8"}
+      {:ex_machina, "~> 2.8"},
+      {:scrivener, "~> 2.7"}
     ]
   end
 
