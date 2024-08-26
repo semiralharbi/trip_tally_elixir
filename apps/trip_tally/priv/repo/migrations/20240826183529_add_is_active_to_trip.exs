@@ -3,7 +3,7 @@ defmodule TripTally.Repo.Migrations.AddIsActiveToTrip do
 
   def change do
     alter table(:trips) do
-      add :is_active, :boolean, default: false
+      add :status, :string, default: "planned"
     end
   end
 end
