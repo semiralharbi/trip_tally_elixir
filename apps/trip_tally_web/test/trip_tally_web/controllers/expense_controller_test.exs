@@ -31,7 +31,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
     end
 
     test "lists all expenses categories", %{conn: conn} do
-      conn = get(conn, "/api/categories")
+      conn = get(conn, "/api/expenses_categories")
 
       assert %{"categories" => categories} = json_response(conn, 200)
       assert length(categories) == 22

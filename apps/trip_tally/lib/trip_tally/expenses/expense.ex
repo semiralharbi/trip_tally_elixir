@@ -46,7 +46,7 @@ defmodule TripTally.Expenses.Expense do
   end
 
   @cast_fields [:name, :price, :date, :trip_id, :user_id, :category]
-  @required_fields [:price, :date, :trip_id, :user_id]
+  @required_fields [:price, :date, :trip_id, :user_id, :category]
   @update_cast_fields [:name, :price, :date, :category]
   @doc false
   def changeset(expense, attrs) do
