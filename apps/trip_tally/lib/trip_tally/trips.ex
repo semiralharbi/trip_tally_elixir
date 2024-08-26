@@ -16,7 +16,9 @@ defmodule TripTally.Trips do
     today = Date.utc_today()
 
     Trip
-    |> where([t], t.user_id == ^user_id and t.date_from == ^today)
+    |> where([t], t.user_id == ^user_id)
+    |> where([t], t.date_from == ^today)
+    |> where([t], not t.is_active)
     |> Repo.one()
     |> Repo.preload([:location, :expenses])
     |> case do

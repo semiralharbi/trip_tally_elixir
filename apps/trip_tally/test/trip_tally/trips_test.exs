@@ -26,6 +26,13 @@ defmodule TripTally.TripsTest do
       assert length(expenses) == 4
     end
 
+    test "ignore trip for today if it is activated" do
+      trip = insert(:trip, %{date_from: Timex.now(), is_active: true})
+      insert_list(4, :expense, %{user_id: trip.user_id, trip_id: trip.id})
+
+      assert {:error, :not_found} = Trips.fetch_trip_starting_today(trip.user_id)
+    end
+
     test "creates trip with location successfully" do
       additional_attrs = %{
         "country_code" => "PL",

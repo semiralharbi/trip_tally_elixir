@@ -19,6 +19,7 @@ defmodule TripTally.Trips.Trip do
     field :planned_cost, MoneyType
     field :date_from, :date
     field :date_to, :date
+    field :is_active, :boolean, default: false
 
     belongs_to :location, TripTally.Trips.Locations, type: :binary_id, foreign_key: :location_id
     belongs_to :user, TripTally.Accounts.User, type: :binary_id, foreign_key: :user_id
@@ -28,8 +29,8 @@ defmodule TripTally.Trips.Trip do
     timestamps()
   end
 
-  @required_params ~w(transport_type date_from date_to planned_cost location_id user_id)a
-  @update_params ~w(transport_type planned_cost date_from date_to)a
+  @required_params ~w(transport_type date_from date_to planned_cost location_id user_id is_active)a
+  @update_params ~w(transport_type planned_cost date_from date_to is_active)a
 
   def changeset(trip, attrs) do
     attrs = attrs |> normalize_dates()
