@@ -1,5 +1,4 @@
 defmodule TripTally.TripsTest do
-  alias TripTally.Trips.Trip
   use TripTally.DataCase
 
   alias TripTally.Trips
@@ -28,7 +27,7 @@ defmodule TripTally.TripsTest do
     end
 
     test "ignore trip for today if it is activated" do
-      trip = insert(:trip, %{date_from: Timex.now(), is_active: true})
+      trip = insert(:trip, %{date_from: Timex.now(), status: :in_progress})
       insert_list(4, :expense, %{user_id: trip.user_id, trip_id: trip.id})
 
       assert {:error, :not_found} = Trips.fetch_trip_starting_today(trip.user_id)
@@ -109,8 +108,8 @@ defmodule TripTally.TripsTest do
 
     test "updates trip as active successfully" do
       trip = insert(:trip)
-      new_attrs = %{"is_active" => true}
-      assert {:ok, %{is_active: true}} = Trips.update(trip.id, new_attrs)
+      new_attrs = %{"status" => "in_progress"}
+      assert {:ok, %{status: :in_progress}} = Trips.update(trip.id, new_attrs)
     end
 
     test "updates non-existent trip" do
