@@ -117,4 +117,18 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
         error
     end
   end
+
+  @doc """
+  Purpose: Fetches all expense categories available in the system.
+
+  Endpoint: GET /api/expenses/categories
+
+  Parameters: None
+
+  Returns: JSON array of categories, each represented as an atom.
+  """
+  def categories(conn, _params, _user) do
+    categories = Expenses.Expense.categories()
+    render(conn, "categories.json", categories: categories)
+  end
 end

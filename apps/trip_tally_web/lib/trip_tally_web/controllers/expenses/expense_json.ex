@@ -15,6 +15,10 @@ defmodule TripTallyWeb.Expenses.ExpenseJSON do
     %{expense: expense}
   end
 
+  def categories(%{categories: categories}) do
+    %{categories: categories}
+  end
+
   defp convert_planned_cost_amount(expense) do
     Map.update(expense, :price, 0, fn price ->
       Map.update(price, :amount, 0, fn amount ->
