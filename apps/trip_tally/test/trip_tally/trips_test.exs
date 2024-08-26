@@ -1,4 +1,5 @@
 defmodule TripTally.TripsTest do
+  alias TripTally.Trips.Trip
   use TripTally.DataCase
 
   alias TripTally.Trips
@@ -104,6 +105,12 @@ defmodule TripTally.TripsTest do
       assert {:ok, updated_trip} = Trips.update(trip.id, new_attrs)
       assert updated_trip.planned_cost == %Money{amount: 35_000, currency: :EUR}
       assert trip.planned_cost != updated_trip.planned_cost
+    end
+
+    test "updates trip as active successfully" do
+      trip = insert(:trip)
+      new_attrs = %{"is_active" => true}
+      assert {:ok, %{is_active: true}} = Trips.update(trip.id, new_attrs)
     end
 
     test "updates non-existent trip" do
