@@ -4,6 +4,7 @@ defmodule TripTally.Expenses do
   """
 
   import Ecto.Query, warn: false
+  alias Ecto.Multi
   alias TripTally.Money
   alias TripTally.Repo
 
@@ -62,6 +63,38 @@ defmodule TripTally.Expenses do
     %Expense{}
     |> Expense.changeset(params)
     |> Repo.insert()
+  end
+
+  @doc """
+  Creates multiple expenses.
+
+  example_attrs = [
+    %{
+        name: "some name",
+        date: ~D[2024-04-30],
+        price: Money.new(12_050, :USD),
+        trip_id: binary_id,
+        user_id: binary_id
+      }
+  ]
+
+  """
+  def create_multiple(expenses) do
+    multi =
+      Enum.with_index(expenses)
+      |> Enum.reduce(Multi.new(), fn {expense_attrs, index}, multi ->
+        params = Money.create_price(expense_attrs, "price")
+
+        Multi.insert(multi, :"insert_#{index}", Expense.changeset(%Expense{}, params))
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, result} ->
+        {:ok, result |> Map.values()}
+
+      {:error, failed_operation, failed_value, _changes} ->
+        {:error, failed_operation, failed_value}
+    end
   end
 
   @doc """
