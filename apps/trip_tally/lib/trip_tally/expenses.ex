@@ -83,16 +83,14 @@ defmodule TripTally.Expenses do
     multi =
       Enum.with_index(expenses)
       |> Enum.reduce(Multi.new(), fn {expense_attrs, index}, multi ->
-        # The params should be built correctly by passing the right data to Money.create_price/2
         params = Money.create_price(expense_attrs, "price")
 
-        # Create a unique name for each insert operation based on the index
         Multi.insert(multi, :"insert_#{index}", Expense.changeset(%Expense{}, params))
       end)
 
     case Repo.transaction(multi) do
       {:ok, result} ->
-        {:ok, result}
+        {:ok, result |> Map.values()}
 
       {:error, failed_operation, failed_value, _changes} ->
         {:error, failed_operation, failed_value}

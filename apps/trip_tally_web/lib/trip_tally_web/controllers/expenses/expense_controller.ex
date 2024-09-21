@@ -45,17 +45,17 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
       Enum.map(expense_list, fn expense -> Map.put(expense, "user_id", user.id) end)
 
     case Expenses.create_multiple(expense_list_with_user_id) do
-      {:ok, _result} ->
+      {:ok, result} ->
         conn
         |> put_status(:created)
-        |> render("index.json", expenses: expense_list_with_user_id)
+        |> render("index.json", expenses: result)
 
       {:error, _failed_operation, changeset} ->
         {:error, changeset}
     end
   end
 
-  def create(conn, %{"expenses" => params}, user) do
+  def create(conn, %{"expense" => params}, user) do
     params =
       params
       |> Map.put("user_id", user.id)

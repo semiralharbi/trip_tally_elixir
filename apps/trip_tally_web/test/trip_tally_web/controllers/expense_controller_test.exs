@@ -59,7 +59,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
         "trip_id" => trip_id
       }
 
-      conn = post(conn, "/api/expenses", %{"expenses" => attrs})
+      conn = post(conn, "/api/expenses", %{"expense" => attrs})
 
       assert %{
                "expense" => %{
@@ -74,7 +74,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       invalid_attrs = %{"name" => "", "amount" => nil, "currency" => ""}
-      conn = post(conn, "/api/expenses", %{"expenses" => invalid_attrs})
+      conn = post(conn, "/api/expenses", %{"expense" => invalid_attrs})
       response = json_response(conn, 422)
 
       expected_errors = [
