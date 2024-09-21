@@ -10,7 +10,7 @@ defmodule TripTally.Money do
     amount =
       case Map.get(attrs, "amount") do
         amount when is_binary(amount) ->
-          String.to_integer(amount) |> Kernel.*(100) |> round()
+          String.to_float(amount) |> Kernel.*(100) |> round()
 
         amount when is_float(amount) ->
           amount |> Kernel.*(100) |> round()

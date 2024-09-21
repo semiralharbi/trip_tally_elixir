@@ -40,7 +40,22 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
   Returns: JSON representation of the newly created expense with its unique identifier, or an error message if the creation fails.
   """
 
-  def create(conn, params, user) do
+  def create(conn, %{"expenses" => expense_list}, user) when is_list(expense_list) do
+    expense_list_with_user_id =
+      Enum.map(expense_list, fn expense -> Map.put(expense, "user_id", user.id) end)
+
+    case Expenses.create_multiple(expense_list_with_user_id) do
+      {:ok, _result} ->
+        conn
+        |> put_status(:created)
+        |> render("index.json", expenses: expense_list_with_user_id)
+
+      {:error, _failed_operation, changeset} ->
+        {:error, changeset}
+    end
+  end
+
+  def create(conn, %{"expenses" => params}, user) do
     params =
       params
       |> Map.put("user_id", user.id)

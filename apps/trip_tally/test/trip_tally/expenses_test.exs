@@ -104,4 +104,67 @@ defmodule TripTally.ExpensesTest do
   test "attempt to delete non-existent expense raises error", %{user: user} do
     assert {:error, :not_found} = Expenses.delete(@invalid_expense_id, user.id)
   end
+
+  describe "create_multiple" do
+    test "create_multiple/1 creates multiple expenses successfully", %{user: user, trip: trip} do
+      expenses_attrs = [
+        %{
+          "name" => "Hotel",
+          "currency" => "USD",
+          "amount" => 200.0,
+          "category" => "activities",
+          "date" => ~D[2024-04-30],
+          "trip_id" => trip.id,
+          "user_id" => user.id
+        },
+        %{
+          "name" => "Flight",
+          "currency" => "USD",
+          "amount" => 500.0,
+          "category" => "activities",
+          "date" => ~D[2024-04-29],
+          "trip_id" => trip.id,
+          "user_id" => user.id
+        }
+      ]
+
+      assert {:ok, _result} = Expenses.create_multiple(expenses_attrs)
+
+      expenses = Expenses.get_all_user_expenses(user.id)
+      assert length(expenses) == 2
+      assert Enum.any?(expenses, fn e -> e.name == "Hotel" end)
+      assert Enum.any?(expenses, fn e -> e.name == "Flight" end)
+    end
+
+    test "create_multiple/1 returns an error when one expense is invalid", %{
+      user: user,
+      trip: trip
+    } do
+      expenses_attrs = [
+        %{
+          "name" => "Hotel",
+          "currency" => "USD",
+          "amount" => 200.0,
+          "category" => "activities",
+          "date" => ~D[2024-04-30],
+          "trip_id" => trip.id,
+          "user_id" => user.id
+        },
+        %{
+          "name" => "",
+          "currency" => "USD",
+          "amount" => nil,
+          "category" => "activities",
+          "date" => ~D[2024-04-29],
+          "trip_id" => trip.id,
+          "user_id" => user.id
+        }
+      ]
+
+      assert {:error, _failed_operation, changeset} =
+               Expenses.create_multiple(expenses_attrs)
+
+      assert %{price: ["can't be blank"]} = errors_on(changeset)
+    end
+  end
 end

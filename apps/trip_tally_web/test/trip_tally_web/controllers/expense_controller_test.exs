@@ -59,7 +59,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
         "trip_id" => trip_id
       }
 
-      conn = post(conn, "/api/expenses", attrs)
+      conn = post(conn, "/api/expenses", %{"expenses" => attrs})
 
       assert %{
                "expense" => %{
@@ -74,7 +74,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
     test "renders errors when data is invalid", %{conn: conn} do
       invalid_attrs = %{"name" => "", "amount" => nil, "currency" => ""}
-      conn = post(conn, "/api/expenses", invalid_attrs)
+      conn = post(conn, "/api/expenses", %{"expenses" => invalid_attrs})
       response = json_response(conn, 422)
 
       expected_errors = [
@@ -171,6 +171,73 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
       conn = get(conn, "/api/expenses/#{expense_id}")
       assert response(conn, 404)
+    end
+  end
+
+  describe "create multiple expenses" do
+    setup %{user: %{id: user_id}} do
+      trip = insert(:trip, user_id: user_id)
+
+      {:ok, %{trip: trip}}
+    end
+
+    test "creates and renders multiple expenses when data is valid", %{
+      conn: conn,
+      trip: %{id: trip_id},
+      user: %{id: user_id}
+    } do
+      attrs = [
+        %{
+          "name" => "Hotel",
+          "amount" => 1000.0,
+          "currency" => "USD",
+          "category" => "activities",
+          "date" => ~D[2024-04-30],
+          "trip_id" => trip_id
+        },
+        %{
+          "name" => "Flight",
+          "amount" => 500.0,
+          "currency" => "USD",
+          "category" => "activities",
+          "date" => ~D[2024-04-29],
+          "trip_id" => trip_id
+        }
+      ]
+
+      conn = post(conn, "/api/expenses", %{"expenses" => attrs})
+
+      assert %{"expenses" => expenses} = json_response(conn, 201)
+      assert length(expenses) == 2
+      assert Enum.all?(expenses, fn expense -> expense["user_id"] == user_id end)
+    end
+
+    test "renders errors when one or more expenses are invalid", %{
+      conn: conn,
+      trip: %{id: trip_id}
+    } do
+      attrs = [
+        %{
+          "name" => "Hotel",
+          "amount" => 1000.0,
+          "currency" => "USD",
+          "category" => "accommodation",
+          "date" => ~D[2024-04-30],
+          "trip_id" => trip_id
+        },
+        %{
+          "name" => "",
+          "amount" => nil,
+          "currency" => "USD",
+          "category" => "transportation",
+          "date" => ~D[2024-04-29],
+          "trip_id" => trip_id
+        }
+      ]
+
+      conn = post(conn, "/api/expenses", %{"expenses" => attrs})
+
+      assert %{"errors" => _errors} = json_response(conn, 422)
     end
   end
 end
