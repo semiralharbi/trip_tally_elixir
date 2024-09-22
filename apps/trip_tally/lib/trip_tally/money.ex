@@ -98,7 +98,7 @@ defmodule TripTally.Money do
             round(amount * 100)
 
           false ->
-            {:error, "Invalid amount format"} |> IO.inspect()
+            {:error, "Invalid amount format"}
         end
     end
   end

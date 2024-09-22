@@ -1,8 +1,6 @@
 defmodule TripTallyWeb.Trips.TripsJSON do
   alias TripTally.Money
   alias TripTally.Trips.Trip
-  alias Money
-  alias Decimal
 
   @doc """
   Renders a list of trips.
