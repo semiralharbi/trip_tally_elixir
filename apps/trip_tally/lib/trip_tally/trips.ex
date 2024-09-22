@@ -4,6 +4,7 @@ defmodule TripTally.Trips do
   import Ecto.Query, warn: false
 
   alias Ecto.Multi
+  alias TripTally.Expenses
   alias TripTally.Locations
   alias TripTally.Money
   alias TripTally.Repo
@@ -34,23 +35,41 @@ defmodule TripTally.Trips do
     attrs = Money.create_price(attrs, "planned_cost")
 
     Multi.new()
-    |> Multi.run(:location, fn _repo, _changes ->
-      Locations.create_or_fetch_location(attrs)
-    end)
-    |> Multi.run(:trip, fn _repo, %{location: location} ->
-      attrs
-      |> Map.merge(%{"location_id" => location.id})
-      |> create_trip()
-    end)
-    |> Multi.run(:preload_trip, fn _repo, %{trip: trip} ->
-      preloaded_trip = Repo.preload(trip, [:location, :expenses])
-      {:ok, Map.drop(preloaded_trip, [:location_id])}
-    end)
+    |> Multi.run(:location, fn _repo, _changes -> Locations.create_or_fetch_location(attrs) end)
+    |> Multi.run(:trip, fn _repo, %{location: location} -> create_trip(attrs, location) end)
+    |> Multi.run(:expenses, fn _repo, %{trip: trip} -> create_expenses(attrs, trip) end)
+    |> Multi.run(:preload_trip, fn _repo, %{trip: trip} -> preload_trip(trip) end)
     |> Repo.transaction()
-    |> case do
-      {:ok, %{preload_trip: trip}} -> {:ok, trip}
-      {:error, _, error, _} -> {:error, error}
+    |> handle_transaction_result()
+  end
+
+  defp create_expenses(attrs, trip) do
+    expenses = attrs["expenses"] || []
+    expenses_with_trip = Enum.map(expenses, &add_trip_and_user(&1, trip))
+
+    case Expenses.create_multiple(expenses_with_trip) do
+      {:ok, expenses} -> {:ok, expenses}
+      {:error, changeset} -> {:error, changeset}
     end
+  end
+
+  defp add_trip_and_user(expense, trip) do
+    expense
+    |> Map.put("trip_id", trip.id)
+    |> Map.put("user_id", trip.user_id)
+  end
+
+  defp preload_trip(trip) do
+    {:ok, Repo.preload(trip, [:location, :expenses]) |> Map.drop([:location_id])}
+  end
+
+  defp handle_transaction_result({:ok, %{preload_trip: trip}}), do: {:ok, trip}
+  defp handle_transaction_result({:error, _, changeset, _}), do: {:error, changeset}
+
+  defp create_trip(attrs, location) do
+    attrs
+    |> Map.put("location_id", location.id)
+    |> create_trip()
   end
 
   defp create_trip(attrs) do

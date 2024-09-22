@@ -43,13 +43,152 @@ defmodule TripTallyWeb.TripsControllerTest do
           "date_from" => "2024-01-01",
           "date_to" => "2024-01-05",
           "id" => ^trip_id,
-          "planned_cost" => %{"amount" => 1000.0, "currency" => "USD"}
+          "planned_cost" => %{"amount" => "1000", "currency" => "USD"},
+          "expenses" => [],
+          "status" => "planned"
         }
       } = json_response(conn, 200)
     end
   end
 
   describe "create" do
+    test "creates trip with expenses", %{conn: conn, user: %{id: user_id}} do
+      trip_attrs = %{
+        "transport_type" => "Bus",
+        "amount" => 1000.0,
+        "currency" => "EUR",
+        "date_from" => ~D[2024-04-01],
+        "date_to" => ~D[2024-04-10],
+        "country_code" => "PL",
+        "city_name" => "Poznan",
+        "expenses" => [
+          %{
+            "name" => "Hotel",
+            "amount" => 1000.0,
+            "currency" => "USD",
+            "date" => ~D[2024-04-02],
+            "category" => "accommodation"
+          },
+          %{
+            "name" => "Flight",
+            "amount" => 1000.0,
+            "currency" => "USD",
+            "date" => ~D[2024-04-01],
+            "category" => "airfare"
+          }
+        ]
+      }
+
+      conn = post(conn, "/api/trips", trip_attrs)
+
+      assert %{
+               "trip" => %{
+                 "user_id" => ^user_id,
+                 "planned_cost" => %{
+                   "amount" => "1000",
+                   "currency" => "EUR"
+                 },
+                 "transport_type" => "Bus",
+                 "location" => %{
+                   "city_name" => "Poznan",
+                   "country_code" => "PL"
+                 },
+                 "date_from" => "2024-04-01",
+                 "date_to" => "2024-04-10",
+                 "expenses" => [
+                   %{
+                     "name" => "Hotel",
+                     "price" => %{"amount" => "1000", "currency" => "USD"},
+                     "date" => "2024-04-02",
+                     "category" => "accommodation"
+                   },
+                   %{
+                     "name" => "Flight",
+                     "price" => %{"amount" => "1000", "currency" => "USD"},
+                     "date" => "2024-04-01",
+                     "category" => "airfare"
+                   }
+                 ]
+               }
+             } = json_response(conn, 201)
+    end
+
+    test "fails to create trip with invalid price of expenses", %{conn: conn} do
+      trip_attrs = %{
+        "transport_type" => "Bus",
+        "amount" => 3500.0,
+        "currency" => "EUR",
+        "date_from" => ~D[2024-04-01],
+        "date_to" => ~D[2024-04-10],
+        "country_code" => "PL",
+        "city_name" => "Poznan",
+        "expenses" => [
+          %{
+            "name" => "",
+            "amount" => nil,
+            "currency" => "EUR",
+            "date" => ~D[2024-04-02],
+            "category" => "accommodation"
+          },
+          %{
+            "name" => "Flight",
+            "amount" => 2000,
+            "currency" => "EUR",
+            "date" => ~D[2024-04-01],
+            "category" => "airfare"
+          }
+        ]
+      }
+
+      conn = post(conn, "/api/trips", trip_attrs)
+
+      response = json_response(conn, 422)
+
+      assert %{
+               "errors" => [
+                 %{"field" => "price", "message" => "The Price cannot be blank."}
+               ]
+             } == response
+    end
+
+    test "fails to create trip with invalid category of expenses", %{conn: conn} do
+      trip_attrs = %{
+        "transport_type" => "Bus",
+        "amount" => 3500.0,
+        "currency" => "EUR",
+        "date_from" => ~D[2024-04-01],
+        "date_to" => ~D[2024-04-10],
+        "country_code" => "PL",
+        "city_name" => "Poznan",
+        "expenses" => [
+          %{
+            "name" => "",
+            "amount" => 2000,
+            "currency" => "EUR",
+            "date" => ~D[2024-04-02],
+            "category" => "accommodation"
+          },
+          %{
+            "name" => "Flight",
+            "amount" => 2000,
+            "currency" => "EUR",
+            "date" => ~D[2024-04-01],
+            "category" => "invalid_category"
+          }
+        ]
+      }
+
+      conn = post(conn, "/api/trips", trip_attrs)
+
+      response = json_response(conn, 422)
+
+      assert %{
+               "errors" => [
+                 %{"field" => "category", "message" => "The Category is invalid."}
+               ]
+             } == response
+    end
+
     test "renders created trip when city name has Greek char", %{conn: conn, user: %{id: user_id}} do
       conn =
         post(conn, "/api/trips", %{
@@ -66,7 +205,7 @@ defmodule TripTallyWeb.TripsControllerTest do
                "trip" => %{
                  "user_id" => ^user_id,
                  "planned_cost" => %{
-                   "amount" => 3500.0,
+                   "amount" => "3500",
                    "currency" => "EUR"
                  },
                  "transport_type" => "Bus",
@@ -118,7 +257,7 @@ defmodule TripTallyWeb.TripsControllerTest do
                  "id" => ^trip_id,
                  "user_id" => ^user_id,
                  "planned_cost" => %{
-                   "amount" => 350.00,
+                   "amount" => "350",
                    "currency" => "EUR"
                  },
                  "transport_type" => "Bus",

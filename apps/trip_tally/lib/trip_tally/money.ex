@@ -10,13 +10,13 @@ defmodule TripTally.Money do
     amount =
       case Map.get(attrs, "amount") do
         amount when is_binary(amount) ->
-          String.to_float(amount) |> Kernel.*(100) |> round()
+          convert_binary_to_float(amount)
 
         amount when is_float(amount) ->
-          amount |> Kernel.*(100) |> round()
+          round(amount * 100)
 
         amount when is_integer(amount) ->
-          amount |> Kernel.*(100) |> round()
+          round(amount * 100)
 
         _ ->
           nil
@@ -47,7 +47,6 @@ defmodule TripTally.Money do
 
   def maybe_update_price(%Trip{planned_cost: existing_price}, params) do
     new_amount = parse_amount_types(params, existing_price.amount)
-
     new_currency = Map.get(params, "currency", existing_price.currency)
 
     {new_amount, new_currency}
@@ -72,7 +71,7 @@ defmodule TripTally.Money do
 
   defp parse_amount_types(params, existing_price_amount) do
     case Map.get(params, "amount", existing_price_amount) do
-      amount when is_binary(amount) -> String.to_integer(amount)
+      amount when is_binary(amount) -> convert_binary_to_float(amount)
       amount when is_float(amount) -> round(amount * 100)
       amount -> amount
     end
@@ -85,4 +84,53 @@ defmodule TripTally.Money do
 
   defp update_params_with_price({:error, _}, params, price_field),
     do: Map.put(params, price_field, "invalid")
+
+  defp convert_binary_to_float(amount) do
+    case Regex.match?(~r/^\d+$/, amount) do
+      true ->
+        amount = String.to_float(amount <> ".0")
+        round(amount * 100)
+
+      false ->
+        case Regex.match?(~r/^\d+\.\d+$/, amount) do
+          true ->
+            amount = String.to_float(amount)
+            round(amount * 100)
+
+          false ->
+            {:error, "Invalid amount format"}
+        end
+    end
+  end
+
+  def convert_to_decimal_amount(data) when is_list(data) do
+    Enum.map(data, &convert_single_to_decimal/1)
+  end
+
+  def convert_to_decimal_amount(data) do
+    convert_single_to_decimal(data)
+  end
+
+  defp convert_single_to_decimal(%{expenses: _expenses} = trip) do
+    trip
+    |> convert_amount_field_to_decimal(:planned_cost)
+    |> Map.update(:expenses, [], &convert_expenses_to_decimal/1)
+  end
+
+  defp convert_single_to_decimal(expense) do
+    convert_amount_field_to_decimal(expense, :price)
+  end
+
+  defp convert_expenses_to_decimal(expenses) do
+    Enum.map(expenses, &convert_amount_field_to_decimal(&1, :price))
+  end
+
+  defp convert_amount_field_to_decimal(struct, field) do
+    Map.update(struct, field, %{}, fn field_value ->
+      Map.update(field_value, :amount, Decimal.new(0), fn amount ->
+        amount
+        |> Decimal.div(Decimal.new(100))
+      end)
+    end)
+  end
 end

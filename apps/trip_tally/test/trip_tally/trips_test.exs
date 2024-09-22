@@ -33,12 +33,28 @@ defmodule TripTally.TripsTest do
       assert {:error, :not_found} = Trips.fetch_trip_starting_today(trip.user_id)
     end
 
-    test "creates trip with location successfully" do
+    test "creates trip with location and associated expenses successfully" do
       additional_attrs = %{
         "country_code" => "PL",
         "city_name" => "Bydgoszcz",
-        "amount" => 350.00,
-        "currency" => "EUR"
+        "amount" => 350.0,
+        "currency" => "EUR",
+        "expenses" => [
+          %{
+            "name" => "Hotel",
+            "currency" => "USD",
+            "amount" => 200.0,
+            "date" => ~D[2024-09-21],
+            "category" => "airfare"
+          },
+          %{
+            "name" => "Flight",
+            "currency" => "USD",
+            "amount" => 200.0,
+            "date" => ~D[2024-09-22],
+            "category" => "clothing"
+          }
+        ]
       }
 
       attrs =
@@ -46,26 +62,38 @@ defmodule TripTally.TripsTest do
         |> Map.delete("planned_cost")
 
       {:ok, trip} = Trips.create_trip_with_location(attrs)
+
       assert trip.location.country_code == "PL"
       assert trip.location.city_name == "Bydgoszcz"
 
+      assert length(trip.expenses) == 2
+      assert Enum.any?(trip.expenses, fn expense -> expense.name == "Hotel" end)
+      assert Enum.any?(trip.expenses, fn expense -> expense.name == "Flight" end)
+    end
+
+    test "fails to create trip with invalid expense category" do
       additional_attrs = %{
         "country_code" => "PL",
         "city_name" => "Bydgoszcz",
-        "amount" => 350.68,
-        "currency" => "EUR"
+        "amount" => 350.0,
+        "currency" => "EUR",
+        "expenses" => [
+          %{
+            "name" => "Invalid Expense",
+            "price" => Money.new(5000, :USD),
+            "date" => ~D[2024-09-21],
+            "category" => :invalid_category
+          }
+        ]
       }
 
       attrs =
         string_params_for(:trip, additional_attrs)
         |> Map.delete("planned_cost")
 
-      string_params_for(:trip, additional_attrs)
-      |> Map.delete("planned_cost")
+      {:error, changeset} = Trips.create_trip_with_location(attrs)
 
-      {:ok, trip} = Trips.create_trip_with_location(attrs)
-      assert trip.location.country_code == "PL"
-      assert trip.location.city_name == "Bydgoszcz"
+      {"is invalid", _} = changeset.errors[:category]
     end
 
     test "fail to creates trip with invalid location data" do
@@ -151,8 +179,8 @@ defmodule TripTally.TripsTest do
 
       new_attrs1 = %{"amount" => "350", "currency" => "EUR"}
       assert {:ok, updated_trip1} = Trips.update(trip.id, new_attrs1)
-      assert updated_trip1.planned_cost.amount == 350
-      assert updated_trip1.planned_cost.amount == 350
+      assert updated_trip1.planned_cost.amount == 35_000
+      assert updated_trip1.planned_cost.amount == 35_000
 
       new_attrs2 = %{"amount" => 35_000, "currency" => "EUR"}
       assert {:ok, updated_trip2} = Trips.update(trip.id, new_attrs2)
