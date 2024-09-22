@@ -92,8 +92,8 @@ defmodule TripTally.Expenses do
       {:ok, result} ->
         {:ok, result |> Map.values()}
 
-      {:error, failed_operation, failed_value, _changes} ->
-        {:error, failed_operation, failed_value}
+      {:error, _failed_operation, changeset, _changes} ->
+        {:error, changeset}
     end
   end
 

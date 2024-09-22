@@ -1,9 +1,11 @@
 defmodule TripTallyWeb.Expenses.ExpenseJSON do
+  alias TripTally.Money
+
   @doc """
   Renders a list of expenses.
   """
   def index(%{expenses: expenses}) do
-    expenses = Enum.map(expenses, &convert_planned_cost_amount/1)
+    expenses = Money.convert_to_decimal_amount(expenses)
     %{expenses: expenses}
   end
 
@@ -11,19 +13,14 @@ defmodule TripTallyWeb.Expenses.ExpenseJSON do
   Renders a single expense.
   """
   def show(%{expense: expense}) do
-    expense = convert_planned_cost_amount(expense)
+    expense = Money.convert_to_decimal_amount(expense)
     %{expense: expense}
   end
 
+  @doc """
+  Renders expense categories.
+  """
   def categories(%{categories: categories}) do
     %{categories: categories}
-  end
-
-  defp convert_planned_cost_amount(expense) do
-    Map.update(expense, :price, 0, fn price ->
-      Map.update(price, :amount, 0, fn amount ->
-        amount / 100.0
-      end)
-    end)
   end
 end

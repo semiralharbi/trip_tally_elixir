@@ -161,7 +161,7 @@ defmodule TripTally.ExpensesTest do
         }
       ]
 
-      assert {:error, _failed_operation, changeset} =
+      assert {:error, changeset} =
                Expenses.create_multiple(expenses_attrs)
 
       assert %{price: ["can't be blank"]} = errors_on(changeset)

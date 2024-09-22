@@ -66,7 +66,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
                  "trip_id" => ^trip_id,
                  "user_id" => ^user_id,
                  "name" => "Hotel",
-                 "price" => %{"amount" => 1000.0, "currency" => "USD"},
+                 "price" => %{"amount" => "1000", "currency" => "USD"},
                  "date" => "2024-04-30"
                }
              } = json_response(conn, 201)
@@ -105,7 +105,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       assert %{
                "expense" => %{
                  "name" => "Test Expense",
-                 "price" => %{"amount" => 100.0, "currency" => "USD"},
+                 "price" => %{"amount" => "100", "currency" => "USD"},
                  "user_id" => ^user_id,
                  "id" => ^expense_id
                }
@@ -138,7 +138,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       assert %{
                "expense" => %{
                  "name" => "Updated Breakfast",
-                 "price" => %{"amount" => 100.0, "currency" => "USD"},
+                 "price" => %{"amount" => "100", "currency" => "USD"},
                  "user_id" => ^user_id,
                  "id" => ^expense_id
                }
@@ -237,7 +237,12 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
       conn = post(conn, "/api/expenses", %{"expenses" => attrs})
 
-      assert %{"errors" => _errors} = json_response(conn, 422)
+      assert %{
+               "errors" => [
+                 %{"field" => "category", "message" => "The Category is invalid."},
+                 %{"field" => "price", "message" => "The Price cannot be blank."}
+               ]
+             } = json_response(conn, 422)
     end
   end
 end

@@ -50,7 +50,7 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
         |> put_status(:created)
         |> render("index.json", expenses: result)
 
-      {:error, _failed_operation, changeset} ->
+      {:error, changeset} ->
         {:error, changeset}
     end
   end

@@ -24,7 +24,7 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Parameters:
   - transport_type (String): Type of transportation used for the trip.
-  - planned_cost (Integer): Estimated cost of the trip.
+  - planned_cost (Float): Estimated cost of the trip.
   - date_from (Date): Start date of the trip.
   - date_to (Date): End date of the trip.
   - country_code (String): Country code of the trip location.
@@ -81,7 +81,7 @@ defmodule TripTallyWeb.Trips.TripsController do
   - trip_id (Binary ID): ID of the trip to update.
   - trip_params (Map): Contains any of the following fields that might be updated:
     - transport_type (String)
-    - planned_cost (Integer)
+    - planned_cost (Float)
     - date_from (Date)
     - date_to (Date)
     - country_code (String): Country code of the trip location.
