@@ -8,7 +8,7 @@ defmodule TripTally.Factory do
 
   alias Bcrypt
   alias TripTally.Accounts.User
-  alias TripTally.Expenses.{Expense, Category}
+  alias TripTally.Expenses.{Category, Expense}
   alias TripTally.Trips.{Locations, Trip}
 
   defp unique_user_email, do: "user#{System.unique_integer()}@example.com"

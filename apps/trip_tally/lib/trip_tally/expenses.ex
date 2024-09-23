@@ -6,10 +6,11 @@ defmodule TripTally.Expenses do
   import Ecto.Query, warn: false
 
   alias Ecto.Multi
-  alias TripTally.Money
-  alias TripTally.Repo
   alias TripTally.Expenses.Category
   alias TripTally.Expenses.Expense
+  alias TripTally.Money
+
+  alias TripTally.Repo
 
   @doc """
   Returns the list of all user expenses.
