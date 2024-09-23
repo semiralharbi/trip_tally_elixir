@@ -9,7 +9,6 @@ defmodule TripTally.Expenses do
   alias TripTally.Expenses.Category
   alias TripTally.Expenses.Expense
   alias TripTally.Money
-
   alias TripTally.Repo
 
   @doc """
@@ -37,7 +36,9 @@ defmodule TripTally.Expenses do
   Gets all expense categories.
   """
   def get_all_expense_categories do
-    Repo.all(Category)
+    Category
+    |> order_by(:name)
+    |> Repo.all()
   end
 
   @doc """
