@@ -25,6 +25,12 @@ defmodule TripTallyWeb.TripsControllerTest do
 
   setup :register_and_log_in_user
 
+  setup do
+    category = insert(:category)
+
+    {:ok, category: category}
+  end
+
   describe "index" do
     test "lists all trips", %{conn: conn} do
       conn = get(conn, "/api/trips")
@@ -52,7 +58,11 @@ defmodule TripTallyWeb.TripsControllerTest do
   end
 
   describe "create" do
-    test "creates trip with expenses", %{conn: conn, user: %{id: user_id}} do
+    test "creates trip with expenses", %{
+      conn: conn,
+      user: %{id: user_id},
+      category: %{id: category_id}
+    } do
       trip_attrs = %{
         "transport_type" => "Bus",
         "amount" => 1000.0,
@@ -67,14 +77,14 @@ defmodule TripTallyWeb.TripsControllerTest do
             "amount" => 1000.0,
             "currency" => "USD",
             "date" => ~D[2024-04-02],
-            "category" => "accommodation"
+            "category_id" => category_id
           },
           %{
             "name" => "Flight",
             "amount" => 1000.0,
             "currency" => "USD",
             "date" => ~D[2024-04-01],
-            "category" => "airfare"
+            "category_id" => category_id
           }
         ]
       }
@@ -100,20 +110,29 @@ defmodule TripTallyWeb.TripsControllerTest do
                      "name" => "Hotel",
                      "price" => %{"amount" => "1000", "currency" => "USD"},
                      "date" => "2024-04-02",
-                     "category" => "accommodation"
+                     "category" => %{
+                       "name" => "Test Category",
+                       "translation_key" => "expense_category.test"
+                     }
                    },
                    %{
                      "name" => "Flight",
                      "price" => %{"amount" => "1000", "currency" => "USD"},
                      "date" => "2024-04-01",
-                     "category" => "airfare"
+                     "category" => %{
+                       "name" => "Test Category",
+                       "translation_key" => "expense_category.test"
+                     }
                    }
                  ]
                }
              } = json_response(conn, 201)
     end
 
-    test "fails to create trip with invalid price of expenses", %{conn: conn} do
+    test "fails to create trip with invalid price of expenses", %{
+      conn: conn,
+      category: %{id: category_id}
+    } do
       trip_attrs = %{
         "transport_type" => "Bus",
         "amount" => 3500.0,
@@ -128,14 +147,14 @@ defmodule TripTallyWeb.TripsControllerTest do
             "amount" => nil,
             "currency" => "EUR",
             "date" => ~D[2024-04-02],
-            "category" => "accommodation"
+            "category_id" => category_id
           },
           %{
             "name" => "Flight",
             "amount" => 2000,
             "currency" => "EUR",
             "date" => ~D[2024-04-01],
-            "category" => "airfare"
+            "category_id" => category_id
           }
         ]
       }
@@ -166,14 +185,14 @@ defmodule TripTallyWeb.TripsControllerTest do
             "amount" => 2000,
             "currency" => "EUR",
             "date" => ~D[2024-04-02],
-            "category" => "accommodation"
+            "category_id" => UUID.uuid1()
           },
           %{
             "name" => "Flight",
             "amount" => 2000,
             "currency" => "EUR",
             "date" => ~D[2024-04-01],
-            "category" => "invalid_category"
+            "category_id" => UUID.uuid1()
           }
         ]
       }
@@ -184,7 +203,7 @@ defmodule TripTallyWeb.TripsControllerTest do
 
       assert %{
                "errors" => [
-                 %{"field" => "category", "message" => "The Category is invalid."}
+                 %{"field" => "category_id", "message" => "does not exist"}
                ]
              } == response
     end
@@ -222,15 +241,16 @@ defmodule TripTallyWeb.TripsControllerTest do
     test "renders errors when planned_cost and transport_type is invalid", %{conn: conn} do
       conn = post(conn, "/api/trips", @invalid_attrs)
 
-      assert %{
-               "errors" => [
-                 %{"field" => "planned_cost", "message" => "The Planned cost cannot be blank."},
-                 %{
-                   "field" => "transport_type",
-                   "message" => "The Transport type cannot be blank."
-                 }
-               ]
-             } = json_response(conn, 422)
+      expected_errors = [
+        %{"field" => "planned_cost", "message" => "The Planned cost cannot be blank."},
+        %{
+          "field" => "transport_type",
+          "message" => "The Transport type cannot be blank."
+        }
+      ]
+
+      assert Enum.sort(json_response(conn, 422)["errors"]) ==
+               Enum.sort(expected_errors)
     end
 
     test "renders errors when country_code and city_name is invalid", %{conn: conn} do
@@ -275,26 +295,17 @@ defmodule TripTallyWeb.TripsControllerTest do
       %{id: trip_id} = insert(:trip, %{user_id: user_id})
 
       conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @invalid_attrs})
+      response = json_response(conn, 422)
 
-      assert %{
-               "errors" => [
-                 %{"field" => "planned_cost", "message" => "The Planned cost is invalid."},
-                 %{
-                   "field" => "transport_type",
-                   "message" => "The Transport type cannot be blank."
-                 }
-               ]
-             } == json_response(conn, 422)
+      expected_errors = [
+        %{"field" => "planned_cost", "message" => "The Planned cost is invalid."},
+        %{
+          "field" => "transport_type",
+          "message" => "The Transport type cannot be blank."
+        }
+      ]
 
-      assert %{
-               "errors" => [
-                 %{"field" => "planned_cost", "message" => "The Planned cost is invalid."},
-                 %{
-                   "field" => "transport_type",
-                   "message" => "The Transport type cannot be blank."
-                 }
-               ]
-             } == json_response(conn, 422)
+      assert Enum.sort(response["errors"]) == Enum.sort(expected_errors)
     end
   end
 

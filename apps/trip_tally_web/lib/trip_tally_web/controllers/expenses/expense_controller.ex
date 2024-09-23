@@ -143,7 +143,7 @@ defmodule TripTallyWeb.Expenses.ExpenseController do
   Returns: JSON array of categories, each represented as an atom.
   """
   def categories(conn, _params, _user) do
-    categories = Expenses.Expense.categories()
+    categories = Expenses.get_all_expense_categories()
     render(conn, "categories.json", categories: categories)
   end
 end

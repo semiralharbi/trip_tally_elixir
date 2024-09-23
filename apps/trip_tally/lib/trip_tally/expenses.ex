@@ -4,10 +4,11 @@ defmodule TripTally.Expenses do
   """
 
   import Ecto.Query, warn: false
+
   alias Ecto.Multi
   alias TripTally.Money
   alias TripTally.Repo
-
+  alias TripTally.Expenses.Category
   alias TripTally.Expenses.Expense
 
   @doc """
@@ -17,6 +18,7 @@ defmodule TripTally.Expenses do
     Expense
     |> where([e], e.user_id == ^user_id)
     |> Repo.all()
+    |> Repo.preload(:category)
   end
 
   @doc """
@@ -27,13 +29,14 @@ defmodule TripTally.Expenses do
     |> where([e], e.user_id == ^user_id)
     |> where([e], e.trip_id == ^trip_id)
     |> Repo.all()
+    |> Repo.preload(:category)
   end
 
   @doc """
   Gets all expense categories.
   """
   def get_all_expense_categories do
-    Expense.categories()
+    Repo.all(Category)
   end
 
   @doc """
@@ -42,7 +45,7 @@ defmodule TripTally.Expenses do
   def get_expense(id, user_id) do
     case Repo.get_by(Expense, id: id, user_id: user_id) do
       nil -> {:error, :not_found}
-      expense -> {:ok, expense}
+      expense -> {:ok, expense |> Repo.preload(:category)}
     end
   end
 
@@ -63,6 +66,13 @@ defmodule TripTally.Expenses do
     %Expense{}
     |> Expense.changeset(params)
     |> Repo.insert()
+    |> case do
+      {:ok, expense} ->
+        {:ok, Repo.preload(expense, :category)}
+
+      {:error, changeset} ->
+        {:error, changeset}
+    end
   end
 
   @doc """
@@ -83,9 +93,9 @@ defmodule TripTally.Expenses do
     multi =
       Enum.with_index(expenses)
       |> Enum.reduce(Multi.new(), fn {expense_attrs, index}, multi ->
-        params = Money.create_price(expense_attrs, "price")
-
-        Multi.insert(multi, :"insert_#{index}", Expense.changeset(%Expense{}, params))
+        Multi.run(multi, :"insert_#{index}", fn _repo, _changes ->
+          create(expense_attrs)
+        end)
       end)
 
     case Repo.transaction(multi) do

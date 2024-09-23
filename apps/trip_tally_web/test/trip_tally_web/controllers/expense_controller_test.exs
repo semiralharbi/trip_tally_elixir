@@ -34,27 +34,29 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       conn = get(conn, "/api/expenses_categories")
 
       assert %{"categories" => categories} = json_response(conn, 200)
-      assert length(categories) == 22
+      assert length(categories) == 1
     end
   end
 
   describe "create" do
     setup %{user: %{id: user_id}} do
       trip = insert(:trip, user_id: user_id)
+      category = insert(:category)
 
-      {:ok, %{trip: trip}}
+      {:ok, %{trip: trip, category: category}}
     end
 
     test "creates and renders expense when data is valid", %{
       conn: conn,
       trip: %{id: trip_id},
+      category: %{id: category_id},
       user: %{id: user_id}
     } do
       attrs = %{
         "name" => "Hotel",
         "amount" => 1000.0,
         "currency" => "USD",
-        "category" => "activities",
+        "category_id" => category_id,
         "date" => ~D[2024-04-30],
         "trip_id" => trip_id
       }
@@ -78,7 +80,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       response = json_response(conn, 422)
 
       expected_errors = [
-        %{"field" => "category", "message" => "The Category cannot be blank."},
+        %{"field" => "category_id", "message" => "The Category id cannot be blank."},
         %{"field" => "date", "message" => "The Date cannot be blank."},
         %{"field" => "trip_id", "message" => "The Trip id cannot be blank."},
         %{"field" => "price", "message" => "The Price cannot be blank."}
@@ -177,13 +179,15 @@ defmodule TripTallyWeb.ExpenseControllerTest do
   describe "create multiple expenses" do
     setup %{user: %{id: user_id}} do
       trip = insert(:trip, user_id: user_id)
+      category = insert(:category)
 
-      {:ok, %{trip: trip}}
+      {:ok, %{trip: trip, category: category}}
     end
 
     test "creates and renders multiple expenses when data is valid", %{
       conn: conn,
       trip: %{id: trip_id},
+      category: %{id: category_id},
       user: %{id: user_id}
     } do
       attrs = [
@@ -191,7 +195,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
           "name" => "Hotel",
           "amount" => 1000.0,
           "currency" => "USD",
-          "category" => "activities",
+          "category_id" => category_id,
           "date" => ~D[2024-04-30],
           "trip_id" => trip_id
         },
@@ -199,7 +203,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
           "name" => "Flight",
           "amount" => 500.0,
           "currency" => "USD",
-          "category" => "activities",
+          "category_id" => category_id,
           "date" => ~D[2024-04-29],
           "trip_id" => trip_id
         }
@@ -214,14 +218,15 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
     test "renders errors when one or more expenses are invalid", %{
       conn: conn,
-      trip: %{id: trip_id}
+      trip: %{id: trip_id},
+      category: %{id: category_id}
     } do
       attrs = [
         %{
           "name" => "Hotel",
           "amount" => 1000.0,
           "currency" => "USD",
-          "category" => "accommodation",
+          "category_id" => category_id,
           "date" => ~D[2024-04-30],
           "trip_id" => trip_id
         },
@@ -229,7 +234,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
           "name" => "",
           "amount" => nil,
           "currency" => "USD",
-          "category" => "transportation",
+          "category_id" => category_id,
           "date" => ~D[2024-04-29],
           "trip_id" => trip_id
         }
@@ -239,7 +244,6 @@ defmodule TripTallyWeb.ExpenseControllerTest do
 
       assert %{
                "errors" => [
-                 %{"field" => "category", "message" => "The Category is invalid."},
                  %{"field" => "price", "message" => "The Price cannot be blank."}
                ]
              } = json_response(conn, 422)
