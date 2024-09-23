@@ -60,7 +60,12 @@ defmodule TripTally.Trips do
   end
 
   defp preload_trip(trip) do
-    {:ok, Repo.preload(trip, [:location, :expenses]) |> Map.drop([:location_id])}
+    trip
+    |> Repo.preload([:location, expenses: [:category]])
+    |> case do
+      nil -> {:error, :not_found}
+      preloaded_trip -> {:ok, preloaded_trip}
+    end
   end
 
   defp handle_transaction_result({:ok, %{preload_trip: trip}}), do: {:ok, trip}

@@ -7,6 +7,11 @@ defmodule TripTally.TripsTest do
   @invalid_trip_id "123e4567-e89b-12d3-a456-426614178000"
 
   describe "trips" do
+    setup do
+      category = insert(:category)
+      {:ok, category: category}
+    end
+
     test "checks if there is a trip for today" do
       trip = insert(:trip, %{date_from: Timex.now()})
       insert_list(4, :expense, %{user_id: trip.user_id, trip_id: trip.id})
@@ -33,7 +38,9 @@ defmodule TripTally.TripsTest do
       assert {:error, :not_found} = Trips.fetch_trip_starting_today(trip.user_id)
     end
 
-    test "creates trip with location and associated expenses successfully" do
+    test "creates trip with location and associated expenses successfully", %{
+      category: %{id: category_id}
+    } do
       additional_attrs = %{
         "country_code" => "PL",
         "city_name" => "Bydgoszcz",
@@ -45,14 +52,14 @@ defmodule TripTally.TripsTest do
             "currency" => "USD",
             "amount" => 200.0,
             "date" => ~D[2024-09-21],
-            "category" => "airfare"
+            "category_id" => category_id
           },
           %{
             "name" => "Flight",
             "currency" => "USD",
             "amount" => 200.0,
             "date" => ~D[2024-09-22],
-            "category" => "clothing"
+            "category_id" => category_id
           }
         ]
       }
@@ -80,9 +87,10 @@ defmodule TripTally.TripsTest do
         "expenses" => [
           %{
             "name" => "Invalid Expense",
-            "price" => Money.new(5000, :USD),
+            "amount" => 5000,
+            "currency" => "USD",
             "date" => ~D[2024-09-21],
-            "category" => :invalid_category
+            "category_id" => UUID.uuid1()
           }
         ]
       }
@@ -92,8 +100,7 @@ defmodule TripTally.TripsTest do
         |> Map.delete("planned_cost")
 
       {:error, changeset} = Trips.create_trip_with_location(attrs)
-
-      {"is invalid", _} = changeset.errors[:category]
+      %{category_id: ["does not exist"]} = errors_on(changeset)
     end
 
     test "fail to creates trip with invalid location data" do
