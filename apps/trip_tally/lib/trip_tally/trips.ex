@@ -21,7 +21,7 @@ defmodule TripTally.Trips do
     |> where([t], t.date_from == ^today)
     |> where([t], t.status == :planned)
     |> Repo.one()
-    |> Repo.preload([:location, :expenses])
+    |> repo_preload_trip()
     |> case do
       nil -> {:error, :not_found}
       trip -> {:ok, trip}
@@ -38,7 +38,6 @@ defmodule TripTally.Trips do
     |> Multi.run(:location, fn _repo, _changes -> Locations.create_or_fetch_location(attrs) end)
     |> Multi.run(:trip, fn _repo, %{location: location} -> create_trip(attrs, location) end)
     |> Multi.run(:expenses, fn _repo, %{trip: trip} -> create_expenses(attrs, trip) end)
-    |> Multi.run(:preload_trip, fn _repo, %{trip: trip} -> preload_trip(trip) end)
     |> Repo.transaction()
     |> handle_transaction_result()
   end
@@ -59,16 +58,9 @@ defmodule TripTally.Trips do
     |> Map.put("user_id", trip.user_id)
   end
 
-  defp preload_trip(trip) do
-    trip
-    |> Repo.preload([:location, expenses: [:category]])
-    |> case do
-      nil -> {:error, :not_found}
-      preloaded_trip -> {:ok, preloaded_trip}
-    end
-  end
+  defp handle_transaction_result({:ok, %{trip: trip}}),
+    do: {:ok, repo_preload_trip(trip)}
 
-  defp handle_transaction_result({:ok, %{preload_trip: trip}}), do: {:ok, trip}
   defp handle_transaction_result({:error, _, changeset, _}), do: {:error, changeset}
 
   defp create_trip(attrs, location) do
@@ -90,7 +82,7 @@ defmodule TripTally.Trips do
     query =
       Trip
       |> where([t], t.id == ^id)
-      |> preload([:location, :expenses])
+      |> preload_trip()
 
     case Repo.get(query, id) do
       nil -> {:error, :not_found}
@@ -105,7 +97,7 @@ defmodule TripTally.Trips do
     query =
       Trip
       |> where([t], t.user_id == ^user_id)
-      |> preload([:location, :expenses])
+      |> preload_trip()
 
     Repo.all(query)
   end
@@ -121,8 +113,7 @@ defmodule TripTally.Trips do
       |> Repo.update()
       |> case do
         {:ok, trip} ->
-          trip = Repo.preload(trip, [:location, :expenses])
-          {:ok, trip}
+          {:ok, repo_preload_trip(trip)}
 
         {:error, changeset} ->
           {:error, changeset}
@@ -140,5 +131,14 @@ defmodule TripTally.Trips do
       nil -> {:error, :not_found}
       trip -> Repo.delete(trip)
     end
+  end
+
+  defp preload_trip(trip) do
+    trip
+    |> preload([:location, expenses: [:category]])
+  end
+
+  defp repo_preload_trip(trip) do
+    Repo.preload(trip, [:location, expenses: [:category]])
   end
 end
