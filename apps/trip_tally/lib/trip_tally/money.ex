@@ -7,22 +7,10 @@ defmodule TripTally.Money do
   alias TripTally.Trips.Trip
 
   def create_price(attrs, price_field) do
-    amount =
-      case Map.get(attrs, "amount") do
-        amount when is_binary(amount) ->
-          convert_binary_to_float(amount)
+    price_attrs = Map.get(attrs, price_field, %{})
 
-        amount when is_float(amount) ->
-          round(amount * 100)
-
-        amount when is_integer(amount) ->
-          round(amount * 100)
-
-        _ ->
-          nil
-      end
-
-    currency = Map.get(attrs, "currency")
+    amount = parse_amount(price_attrs["amount"])
+    currency = price_attrs["currency"]
 
     price =
       case {amount, currency} do
@@ -33,26 +21,44 @@ defmodule TripTally.Money do
 
     attrs
     |> Map.put(price_field, price)
-    |> Map.drop(["amount", "currency"])
   end
 
-  def maybe_update_price(%Expense{price: existing_price}, params) do
-    new_amount = parse_amount_types(params, existing_price.amount)
-    new_currency = Map.get(params, "currency", existing_price.currency)
+  defp parse_amount(amount) when is_binary(amount), do: convert_binary_to_float(amount)
+  defp parse_amount(amount) when is_float(amount), do: round(amount * 100)
+  defp parse_amount(amount) when is_integer(amount), do: round(amount * 100)
+  defp parse_amount(_), do: nil
 
-    {new_amount, new_currency}
-    |> update_price_if_changed(existing_price)
-    |> update_params_with_price(params, "price")
+  def maybe_update_price(%Expense{price: existing_price}, %{"price" => params} = attrs) do
+    case params do
+      nil ->
+        attrs
+
+      %{"amount" => _, "currency" => _} ->
+        new_amount = parse_amount_types(params, existing_price.amount)
+        new_currency = Map.get(params, "currency", existing_price.currency)
+
+        {new_amount, new_currency}
+        |> update_price_if_changed(existing_price)
+        |> update_params_with_price(params, "price")
+    end
   end
 
-  def maybe_update_price(%Trip{planned_cost: existing_price}, params) do
-    new_amount = parse_amount_types(params, existing_price.amount)
-    new_currency = Map.get(params, "currency", existing_price.currency)
+  def maybe_update_price(%Trip{planned_cost: existing_price}, %{"planned_cost" => params} = attrs) do
+    case params do
+      nil ->
+        attrs
 
-    {new_amount, new_currency}
-    |> update_price_if_changed(existing_price)
-    |> update_params_with_price(params, "planned_cost")
+      %{"amount" => _, "currency" => _} ->
+        new_amount = parse_amount_types(params, existing_price.amount)
+        new_currency = Map.get(params, "currency", existing_price.currency)
+
+        {new_amount, new_currency}
+        |> update_price_if_changed(existing_price)
+        |> update_params_with_price(params, "planned_cost")
+    end
   end
+
+  def maybe_update_price(_entity, attrs), do: attrs
 
   defp update_price_if_changed({new_amount, new_currency}, %Money{
          amount: existing_amount,

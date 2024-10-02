@@ -2,15 +2,16 @@ defmodule TripTallyWeb.TripsControllerTest do
   use TripTallyWeb.ConnCase, async: true
 
   @update_attrs %{
-    "amount" => 350.00,
-    "currency" => "EUR"
+    "planned_cost" => %{
+      "amount" => 350.00,
+      "currency" => "EUR"
+    }
   }
   @invalid_attrs %{
-    "transport_type" => nil,
-    "amount" => nil,
-    "currency" => nil,
     "date_from" => ~D[2024-04-01],
     "date_to" => ~D[2024-04-10],
+    "transport_type" => nil,
+    "planned_cost" => nil,
     "country_code" => "PL",
     "city_name" => "Poznan"
   }
@@ -65,8 +66,7 @@ defmodule TripTallyWeb.TripsControllerTest do
     } do
       trip_attrs = %{
         "transport_type" => "Bus",
-        "amount" => 1000.0,
-        "currency" => "EUR",
+        "planned_cost" => %{"currency" => "EUR", "amount" => 1000.0},
         "date_from" => ~D[2024-04-01],
         "date_to" => ~D[2024-04-10],
         "country_code" => "PL",
@@ -74,15 +74,13 @@ defmodule TripTallyWeb.TripsControllerTest do
         "expenses" => [
           %{
             "name" => "Hotel",
-            "amount" => 1000.0,
-            "currency" => "USD",
+            "price" => %{"currency" => "USD", "amount" => 1000.0},
             "date" => ~D[2024-04-02],
             "category_id" => category_id
           },
           %{
             "name" => "Flight",
-            "amount" => 1000.0,
-            "currency" => "USD",
+            "price" => %{"currency" => "USD", "amount" => 1000.0},
             "date" => ~D[2024-04-01],
             "category_id" => category_id
           }
@@ -134,9 +132,8 @@ defmodule TripTallyWeb.TripsControllerTest do
       category: %{id: category_id}
     } do
       trip_attrs = %{
+        "planned_cost" => %{"currency" => "EUR", "amount" => 3500.0},
         "transport_type" => "Bus",
-        "amount" => 3500.0,
-        "currency" => "EUR",
         "date_from" => ~D[2024-04-01],
         "date_to" => ~D[2024-04-10],
         "country_code" => "PL",
@@ -144,15 +141,13 @@ defmodule TripTallyWeb.TripsControllerTest do
         "expenses" => [
           %{
             "name" => "",
-            "amount" => nil,
-            "currency" => "EUR",
+            "price" => %{"currency" => "EUR", "amount" => nil},
             "date" => ~D[2024-04-02],
             "category_id" => category_id
           },
           %{
             "name" => "Flight",
-            "amount" => 2000,
-            "currency" => "EUR",
+            "planned_cost" => %{"currency" => "EUR", "amount" => 2000.0},
             "date" => ~D[2024-04-01],
             "category_id" => category_id
           }
@@ -172,9 +167,8 @@ defmodule TripTallyWeb.TripsControllerTest do
 
     test "fails to create trip with invalid category of expenses", %{conn: conn} do
       trip_attrs = %{
+        "planned_cost" => %{"currency" => "EUR", "amount" => 3500.0},
         "transport_type" => "Bus",
-        "amount" => 3500.0,
-        "currency" => "EUR",
         "date_from" => ~D[2024-04-01],
         "date_to" => ~D[2024-04-10],
         "country_code" => "PL",
@@ -182,15 +176,13 @@ defmodule TripTallyWeb.TripsControllerTest do
         "expenses" => [
           %{
             "name" => "",
-            "amount" => 2000,
-            "currency" => "EUR",
+            "price" => %{"currency" => "EUR", "amount" => 2000.0},
             "date" => ~D[2024-04-02],
             "category_id" => UUID.uuid1()
           },
           %{
             "name" => "Flight",
-            "amount" => 2000,
-            "currency" => "EUR",
+            "price" => %{"currency" => "EUR", "amount" => 2000.0},
             "date" => ~D[2024-04-01],
             "category_id" => UUID.uuid1()
           }
@@ -212,8 +204,7 @@ defmodule TripTallyWeb.TripsControllerTest do
       conn =
         post(conn, "/api/trips", %{
           "transport_type" => "Bus",
-          "amount" => 3500.0,
-          "currency" => "EUR",
+          "planned_cost" => %{"currency" => "EUR", "amount" => 3500.0},
           "date_from" => ~D[2024-04-01],
           "date_to" => ~D[2024-04-10],
           "country_code" => "GR",
@@ -298,7 +289,7 @@ defmodule TripTallyWeb.TripsControllerTest do
       response = json_response(conn, 422)
 
       expected_errors = [
-        %{"field" => "planned_cost", "message" => "The Planned cost is invalid."},
+        %{"field" => "planned_cost", "message" => "The Planned cost cannot be blank."},
         %{
           "field" => "transport_type",
           "message" => "The Transport type cannot be blank."

@@ -43,19 +43,20 @@ defmodule TripTally.Trips do
   end
 
   defp create_expenses(attrs, trip) do
-    expenses = attrs["expenses"] || []
-    expenses_with_trip = Enum.map(expenses, &add_trip_and_user(&1, trip))
-
-    case Expenses.create_multiple(expenses_with_trip) do
+    attrs
+    |> Map.get("expenses", [])
+    |> Enum.map(&add_trip_and_user(&1, trip))
+    |> Expenses.create_multiple()
+    |> case do
       {:ok, expenses} -> {:ok, expenses}
       {:error, changeset} -> {:error, changeset}
     end
   end
 
-  defp add_trip_and_user(expense, trip) do
-    expense
-    |> Map.put("trip_id", trip.id)
-    |> Map.put("user_id", trip.user_id)
+  defp add_trip_and_user(expense_params, %Trip{id: trip_id, user_id: user_id}) do
+    expense_params
+    |> Map.put("trip_id", trip_id)
+    |> Map.put("user_id", user_id)
   end
 
   defp handle_transaction_result({:ok, %{trip: trip}}),
@@ -105,21 +106,18 @@ defmodule TripTally.Trips do
   @doc """
   Update a trip by id and replace the attrs.
   """
-  def update(id, attrs) do
-    with {:ok, trip} <- fetch_trip_by_id(id),
-         updated_attrs <- TripTally.Money.maybe_update_price(trip, attrs) do
-      trip
-      |> Trip.changeset_update(updated_attrs)
-      |> Repo.update()
-      |> case do
-        {:ok, trip} ->
-          {:ok, repo_preload_trip(trip)}
+  def update(trip, attrs) do
+    updated_attrs = Money.maybe_update_price(trip, attrs)
 
-        {:error, changeset} ->
-          {:error, changeset}
-      end
-    else
-      _ -> {:error, :not_found}
+    trip
+    |> Trip.changeset_update(updated_attrs)
+    |> Repo.update()
+    |> case do
+      {:ok, trip} ->
+        {:ok, repo_preload_trip(trip)}
+
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 

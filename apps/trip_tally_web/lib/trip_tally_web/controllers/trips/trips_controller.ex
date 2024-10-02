@@ -41,112 +41,59 @@ defmodule TripTallyWeb.Trips.TripsController do
         |> put_status(:created)
         |> render(:show, trip: trip)
 
-      {:error, changeset} ->
-        {:error, changeset}
-
-      _ ->
-        {:error, :forbidden}
+      error ->
+        error
     end
   end
 
   @doc """
-  Purpose: Retrieves a specific trip by its ID, ensuring that it belongs to the logged-in user.
-
-  Endpoint: GET /api/trips/:id
-
-  Parameters:
-  - trip_id (Binary ID): ID of the trip to fetch.
-
-  Returns: JSON representation of the trip if found and belongs to the user; otherwise, a forbidden status.
+  Retrieves a specific trip by its ID, ensuring that it belongs to the logged-in user.
   """
   def show(conn, %{"id" => trip_id}, user) do
-    case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, trip} when trip.user_id == user.id ->
-        render(conn, :show, trip: trip)
-
-      {:ok, _} ->
-        {:error, :forbidden}
-
-      {:error, _reason} ->
-        {:error, :not_found}
+    with {:ok, trip} <- fetch_trip_for_user(trip_id, user) do
+      render(conn, :show, trip: trip)
     end
   end
 
   @doc """
-  Purpose: Updates an existing trip's details, validating that the trip belongs to the logged-in user.
-
-  Endpoint: PUT /api/trips/:trip_id
-
-  Parameters:
-  - trip_id (Binary ID): ID of the trip to update.
-  - trip_params (Map): Contains any of the following fields that might be updated:
-    - transport_type (String)
-    - planned_cost (Float)
-    - date_from (Date)
-    - date_to (Date)
-    - country_code (String): Country code of the trip location.
-    - city_name (String): City name of the trip location.
-
-  Returns: JSON representation of the updated trip if successful; otherwise, an error message.
+  Updates an existing trip's details, ensuring it belongs to the logged-in user.
   """
   def update(conn, %{"id" => trip_id, "trip_params" => trip_params}, user) do
-    case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, trip} when trip.user_id == user.id ->
-        case TripTally.Trips.update(trip.id, trip_params) do
-          {:ok, updated_trip} ->
-            render(conn, :show, trip: updated_trip)
-
-          {:error, changeset} ->
-            {:error, changeset}
-        end
-
-      {:ok, _} ->
-        {:error, :forbidden}
-
-      {:error, _} ->
-        {:error, :not_found}
+    with {:ok, trip} <- fetch_trip_for_user(trip_id, user),
+         {:ok, updated_trip} <- TripTally.Trips.update(trip, trip_params) do
+      render(conn, :show, trip: updated_trip)
+    else
+      error -> error
     end
   end
 
   @doc """
-  Purpose: Deletes a specific trip, ensuring that the trip belongs to the logged-in user.
-
-  Endpoint: DELETE /api/trips/:id
-
-  Parameters:
-  - id (Binary ID): ID of the trip to delete.
-
-  Returns: No content on successful deletion; otherwise, an error message.
+  Deletes a specific trip, ensuring it belongs to the logged-in user.
   """
   def delete(conn, %{"id" => trip_id}, user) do
-    case TripTally.Trips.fetch_trip_by_id(trip_id) do
-      {:ok, %Trip{} = trip} when trip.user_id == user.id ->
-        case TripTally.Trips.delete(trip_id) do
-          {:ok, %Trip{}} ->
-            send_resp(conn, :no_content, "")
-
-          {:error, _reason} ->
-            {:error, :not_found}
-        end
-
-      _ ->
-        {:error, :forbidden}
+    with {:ok, trip} <- fetch_trip_for_user(trip_id, user),
+         {:ok, %Trip{}} <- TripTally.Trips.delete(trip.id) do
+      send_resp(conn, :no_content, "")
+    else
+      error -> error
     end
   end
 
   @doc """
-  Purpose: Checks if there is a trip starting today for the logged-in user.
-
-  Endpoint: GET /api/trips/today
-
-  Parameters: None required. The user ID is obtained from the session.
-
-  Returns: JSON array of trips starting today, or an empty array if none found.
+  Checks if there is a trip starting today for the logged-in user.
   """
   def today(conn, _params, user) do
     case TripTally.Trips.fetch_trip_starting_today(user.id) do
       {:ok, trip} -> render(conn, :show, trip: trip)
       error -> error
+    end
+  end
+
+  defp fetch_trip_for_user(trip_id, user) do
+    case TripTally.Trips.fetch_trip_by_id(trip_id) do
+      {:ok, trip} when trip.user_id == user.id -> {:ok, trip}
+      {:ok, _} -> {:error, :forbidden}
+      {:error, _} -> {:error, :not_found}
     end
   end
 end
