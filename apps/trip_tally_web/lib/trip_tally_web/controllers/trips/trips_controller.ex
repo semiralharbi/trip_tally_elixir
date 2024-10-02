@@ -47,7 +47,14 @@ defmodule TripTallyWeb.Trips.TripsController do
   end
 
   @doc """
-  Retrieves a specific trip by its ID, ensuring that it belongs to the logged-in user.
+  Purpose: Retrieves a specific trip by its ID, ensuring that it belongs to the logged-in user.
+
+  Endpoint: GET /api/trips/:id
+
+  Parameters:
+    - trip_id (Binary ID): ID of the trip to fetch.
+
+  Returns: JSON representation of the trip if found and belongs to the user; otherwise, a forbidden status.
   """
   def show(conn, %{"id" => trip_id}, user) do
     with {:ok, trip} <- fetch_trip_for_user(trip_id, user) do
@@ -56,7 +63,21 @@ defmodule TripTallyWeb.Trips.TripsController do
   end
 
   @doc """
-  Updates an existing trip's details, ensuring it belongs to the logged-in user.
+  Purpose: Updates an existing trip's details, validating that the trip belongs to the logged-in user.
+
+  Endpoint: PUT /api/trips/:trip_id
+
+  Parameters:
+    - trip_id (Binary ID): ID of the trip to update.
+    - trip_params (Map): Contains any of the following fields that might be updated:
+      - transport_type (String)
+      - planned_cost (Float)
+      - date_from (Date)
+      - date_to (Date)
+      - country_code (String): Country code of the trip location.
+      - city_name (String): City name of the trip location.
+
+  Returns: JSON representation of the updated trip if successful; otherwise, an error message.
   """
   def update(conn, %{"id" => trip_id, "trip_params" => trip_params}, user) do
     with {:ok, trip} <- fetch_trip_for_user(trip_id, user),
@@ -68,7 +89,14 @@ defmodule TripTallyWeb.Trips.TripsController do
   end
 
   @doc """
-  Deletes a specific trip, ensuring it belongs to the logged-in user.
+  Purpose: Deletes a specific trip, ensuring that the trip belongs to the logged-in user.
+
+  Endpoint: DELETE /api/trips/:id
+
+  Parameters:
+  - id (Binary ID): ID of the trip to delete.
+
+  Returns: No content on successful deletion; otherwise, an error message.
   """
   def delete(conn, %{"id" => trip_id}, user) do
     with {:ok, trip} <- fetch_trip_for_user(trip_id, user),
@@ -80,7 +108,13 @@ defmodule TripTallyWeb.Trips.TripsController do
   end
 
   @doc """
-  Checks if there is a trip starting today for the logged-in user.
+  Purpose: Checks if there is a trip starting today for the logged-in user.
+
+  Endpoint: GET /api/trips/today
+
+  Parameters: None required. The user ID is obtained from the session.
+
+  Returns: JSON array of trips starting today, or an empty array if none found.
   """
   def today(conn, _params, user) do
     case TripTally.Trips.fetch_trip_starting_today(user.id) do
