@@ -92,21 +92,16 @@ defmodule TripTally.Expenses do
 
   """
   def create_multiple(expenses) do
-    multi =
-      Enum.with_index(expenses)
-      |> Enum.reduce(Multi.new(), fn {expense_attrs, index}, multi ->
-        Multi.run(multi, :"insert_#{index}", fn _repo, _changes ->
-          create(expense_attrs)
-        end)
-      end)
+    expenses
+    |> Enum.reduce(Multi.new(), &add_expense_to_multi/2)
+    |> Repo.transaction()
+    |> handle_transaction_result()
+  end
 
-    case Repo.transaction(multi) do
-      {:ok, result} ->
-        {:ok, result |> Map.values()}
-
-      {:error, _failed_operation, changeset, _changes} ->
-        {:error, changeset}
-    end
+  defp add_expense_to_multi(expense_attrs, multi) do
+    Multi.run(multi, :erlang.unique_integer([:positive]), fn _repo, _changes ->
+      create(expense_attrs)
+    end)
   end
 
   @doc """
@@ -135,4 +130,9 @@ defmodule TripTally.Expenses do
       expense -> Repo.delete(expense)
     end
   end
+
+  defp handle_transaction_result({:ok, result}), do: {:ok, Map.values(result)}
+
+  defp handle_transaction_result({:error, _failed_operation, changeset, _changes}),
+    do: {:error, changeset}
 end

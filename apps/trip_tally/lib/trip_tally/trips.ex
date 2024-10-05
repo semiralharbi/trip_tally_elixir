@@ -21,7 +21,7 @@ defmodule TripTally.Trips do
     |> where([t], t.date_from == ^today)
     |> where([t], t.status == :planned)
     |> Repo.one()
-    |> Repo.preload([:location, :expenses])
+    |> repo_preload_trip()
     |> case do
       nil -> {:error, :not_found}
       trip -> {:ok, trip}
@@ -38,37 +38,30 @@ defmodule TripTally.Trips do
     |> Multi.run(:location, fn _repo, _changes -> Locations.create_or_fetch_location(attrs) end)
     |> Multi.run(:trip, fn _repo, %{location: location} -> create_trip(attrs, location) end)
     |> Multi.run(:expenses, fn _repo, %{trip: trip} -> create_expenses(attrs, trip) end)
-    |> Multi.run(:preload_trip, fn _repo, %{trip: trip} -> preload_trip(trip) end)
     |> Repo.transaction()
     |> handle_transaction_result()
   end
 
   defp create_expenses(attrs, trip) do
-    expenses = attrs["expenses"] || []
-    expenses_with_trip = Enum.map(expenses, &add_trip_and_user(&1, trip))
-
-    case Expenses.create_multiple(expenses_with_trip) do
+    attrs
+    |> Map.get("expenses", [])
+    |> Enum.map(&add_trip_and_user(&1, trip))
+    |> Expenses.create_multiple()
+    |> case do
       {:ok, expenses} -> {:ok, expenses}
       {:error, changeset} -> {:error, changeset}
     end
   end
 
-  defp add_trip_and_user(expense, trip) do
-    expense
-    |> Map.put("trip_id", trip.id)
-    |> Map.put("user_id", trip.user_id)
+  defp add_trip_and_user(expense_params, %Trip{id: trip_id, user_id: user_id}) do
+    expense_params
+    |> Map.put("trip_id", trip_id)
+    |> Map.put("user_id", user_id)
   end
 
-  defp preload_trip(trip) do
-    trip
-    |> Repo.preload([:location, expenses: [:category]])
-    |> case do
-      nil -> {:error, :not_found}
-      preloaded_trip -> {:ok, preloaded_trip}
-    end
-  end
+  defp handle_transaction_result({:ok, %{trip: trip}}),
+    do: {:ok, repo_preload_trip(trip)}
 
-  defp handle_transaction_result({:ok, %{preload_trip: trip}}), do: {:ok, trip}
   defp handle_transaction_result({:error, _, changeset, _}), do: {:error, changeset}
 
   defp create_trip(attrs, location) do
@@ -90,7 +83,7 @@ defmodule TripTally.Trips do
     query =
       Trip
       |> where([t], t.id == ^id)
-      |> preload([:location, :expenses])
+      |> preload_trip()
 
     case Repo.get(query, id) do
       nil -> {:error, :not_found}
@@ -105,7 +98,7 @@ defmodule TripTally.Trips do
     query =
       Trip
       |> where([t], t.user_id == ^user_id)
-      |> preload([:location, :expenses])
+      |> preload_trip()
 
     Repo.all(query)
   end
@@ -113,22 +106,18 @@ defmodule TripTally.Trips do
   @doc """
   Update a trip by id and replace the attrs.
   """
-  def update(id, attrs) do
-    with {:ok, trip} <- fetch_trip_by_id(id),
-         updated_attrs <- TripTally.Money.maybe_update_price(trip, attrs) do
-      trip
-      |> Trip.changeset_update(updated_attrs)
-      |> Repo.update()
-      |> case do
-        {:ok, trip} ->
-          trip = Repo.preload(trip, [:location, :expenses])
-          {:ok, trip}
+  def update(trip, attrs) do
+    updated_attrs = Money.maybe_update_price(trip, attrs)
 
-        {:error, changeset} ->
-          {:error, changeset}
-      end
-    else
-      _ -> {:error, :not_found}
+    trip
+    |> Trip.changeset_update(updated_attrs)
+    |> Repo.update()
+    |> case do
+      {:ok, trip} ->
+        {:ok, repo_preload_trip(trip)}
+
+      {:error, changeset} ->
+        {:error, changeset}
     end
   end
 
@@ -140,5 +129,14 @@ defmodule TripTally.Trips do
       nil -> {:error, :not_found}
       trip -> Repo.delete(trip)
     end
+  end
+
+  defp preload_trip(trip) do
+    trip
+    |> preload([:location, expenses: [:category]])
+  end
+
+  defp repo_preload_trip(trip) do
+    Repo.preload(trip, [:location, expenses: [:category]])
   end
 end

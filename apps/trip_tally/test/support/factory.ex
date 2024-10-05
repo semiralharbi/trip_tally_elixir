@@ -38,7 +38,7 @@ defmodule TripTally.Factory do
     user = insert(:user)
 
     location_attrs = Map.get(attrs, :location, %{}) |> Map.merge(%{user_id: user.id})
-    location = find_or_create_location(location_attrs)
+    location = find_or_create_location(location_attrs) || insert(:location, location_attrs)
 
     %Trip{
       transport_type: "Bus",
@@ -46,7 +46,7 @@ defmodule TripTally.Factory do
       date_from: ~D[2024-01-01],
       date_to: ~D[2024-01-05],
       user_id: user.id,
-      location: location || insert(:location, location_attrs),
+      location: location,
       expenses: []
     }
     |> Map.merge(attrs)

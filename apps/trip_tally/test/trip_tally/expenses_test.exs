@@ -37,11 +37,9 @@ defmodule TripTally.ExpensesTest do
       attrs =
         string_params_for(:expense)
         |> merge_attributes(%{
-          "currency" => "USD",
-          "amount" => 12.05,
+          "price" => %{"currency" => "USD", "amount" => 12.05},
           "category_id" => category_id
         })
-        |> Map.delete("price")
 
       assert {:ok,
               %{
@@ -123,8 +121,7 @@ defmodule TripTally.ExpensesTest do
       expenses_attrs = [
         %{
           "name" => "Hotel",
-          "currency" => "USD",
-          "amount" => 200.0,
+          "price" => %{"currency" => "USD", "amount" => 200.0},
           "category_id" => category_id,
           "date" => ~D[2024-04-30],
           "trip_id" => trip.id,
@@ -132,8 +129,7 @@ defmodule TripTally.ExpensesTest do
         },
         %{
           "name" => "Flight",
-          "currency" => "USD",
-          "amount" => 500.0,
+          "price" => %{"currency" => "USD", "amount" => 500.0},
           "category_id" => category_id,
           "date" => ~D[2024-04-29],
           "trip_id" => trip.id,

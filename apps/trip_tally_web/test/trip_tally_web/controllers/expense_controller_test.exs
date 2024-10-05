@@ -54,8 +54,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
     } do
       attrs = %{
         "name" => "Hotel",
-        "amount" => 1000.0,
-        "currency" => "USD",
+        "price" => %{"amount" => 1000.0, "currency" => "USD"},
         "category_id" => category_id,
         "date" => ~D[2024-04-30],
         "trip_id" => trip_id
@@ -151,7 +150,7 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       conn: conn,
       expense: %{id: expense_id}
     } do
-      invalid_attrs = %{"expense" => %{"currency" => "USD", "amount" => nil}}
+      invalid_attrs = %{"expense" => %{"price" => %{"currency" => "USD", "amount" => nil}}}
 
       conn = put(conn, "/api/expenses/#{expense_id}", invalid_attrs)
 
@@ -193,16 +192,14 @@ defmodule TripTallyWeb.ExpenseControllerTest do
       attrs = [
         %{
           "name" => "Hotel",
-          "amount" => 1000.0,
-          "currency" => "USD",
+          "price" => %{"currency" => "EUR", "amount" => 1000.0},
           "category_id" => category_id,
           "date" => ~D[2024-04-30],
           "trip_id" => trip_id
         },
         %{
           "name" => "Flight",
-          "amount" => 500.0,
-          "currency" => "USD",
+          "price" => %{"currency" => "EUR", "amount" => 500.0},
           "category_id" => category_id,
           "date" => ~D[2024-04-29],
           "trip_id" => trip_id
