@@ -27,9 +27,12 @@ defmodule TripTally.Locations do
     |> Repo.insert()
   end
 
-  def get_location_by_country_and_city(country_code, city_name) do
+  def get_location_by_country_and_city(country_code, city_name)
+      when not is_nil(country_code) and not is_nil(city_name) do
     Locations
     |> where([l], l.country_code == ^country_code and l.city_name == ^city_name)
     |> Repo.one()
   end
+
+  def get_location_by_country_and_city(_, _), do: nil
 end
