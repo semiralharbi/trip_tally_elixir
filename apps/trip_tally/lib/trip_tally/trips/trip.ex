@@ -21,6 +21,7 @@ defmodule TripTally.Trips.Trip do
     field :date_from, :date
     field :date_to, :date
     field :status, Ecto.Enum, values: @trip_statuses, default: :planned
+    field :total_expenses, :float, virtual: true
 
     belongs_to :location, TripTally.Trips.Locations, type: :binary_id, foreign_key: :location_id
     belongs_to :user, TripTally.Accounts.User, type: :binary_id, foreign_key: :user_id

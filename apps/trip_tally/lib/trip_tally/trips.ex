@@ -59,8 +59,7 @@ defmodule TripTally.Trips do
     |> Map.put("user_id", user_id)
   end
 
-  defp handle_transaction_result({:ok, %{trip: trip}}),
-    do: {:ok, repo_preload_trip(trip)}
+  defp handle_transaction_result({:ok, %{trip: trip}}), do: {:ok, repo_preload_trip(trip)}
 
   defp handle_transaction_result({:error, _, changeset, _}), do: {:error, changeset}
 
@@ -83,9 +82,14 @@ defmodule TripTally.Trips do
     query =
       Trip
       |> where([t], t.id == ^id)
-      |> preload_trip()
+      |> join(:left, [t], e in assoc(t, :expenses))
+      |> group_by([t], t.id)
+      |> preload([t, e], [:location, expenses: [:category]])
+      |> select_merge([t, e], %{
+        total_expenses: fragment("COALESCE(SUM((?).amount), 0.0)", e.price)
+      })
 
-    case Repo.get(query, id) do
+    case Repo.one(query) do
       nil -> {:error, :not_found}
       trip -> {:ok, trip}
     end
@@ -98,7 +102,12 @@ defmodule TripTally.Trips do
     query =
       Trip
       |> where([t], t.user_id == ^user_id)
-      |> preload_trip()
+      |> join(:left, [t], e in assoc(t, :expenses))
+      |> group_by([t], t.id)
+      |> preload([t, e], [:location, expenses: [:category]])
+      |> select_merge([t, e], %{
+        total_expenses: fragment("COALESCE(SUM((?).amount), 0.0)", e.price)
+      })
 
     Repo.all(query)
   end
@@ -129,11 +138,6 @@ defmodule TripTally.Trips do
       nil -> {:error, :not_found}
       trip -> Repo.delete(trip)
     end
-  end
-
-  defp preload_trip(trip) do
-    trip
-    |> preload([:location, expenses: [:category]])
   end
 
   defp repo_preload_trip(trip) do
