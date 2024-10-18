@@ -8,6 +8,8 @@ defmodule TripTally.Attachments.Attachment do
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
+  @derive {Jason.Encoder,
+           only: [:id, :url, :type, :filename, :content_type, :aspect_ratio, :user_id]}
   schema "attachments" do
     field :url, :string
     field :type, Ecto.Enum, values: [:image]

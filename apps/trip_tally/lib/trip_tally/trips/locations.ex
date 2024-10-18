@@ -23,8 +23,8 @@ defmodule TripTally.Trips.Locations do
   @doc false
   def changeset(location, attrs) do
     location
-    |> cast(attrs, [:country_code, :city_name])
-    |> validate_required([:country_code, :city_name])
+    |> cast(attrs, [:country_code, :city_name, :user_id])
+    |> validate_required([:country_code, :city_name, :user_id])
     |> validate_city_name_syntax()
     |> unique_constraint(:city_name_country, name: :city_country_index)
   end

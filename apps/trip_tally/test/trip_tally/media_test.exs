@@ -60,6 +60,10 @@ defmodule TripTally.MediaTest do
       content_type: "image/jpeg"
     }
 
+    host = System.get_env("PHX_HOST") || "localhost"
+    port = Application.get_env(:trip_tally_web, TripTallyWeb.Endpoint)
+    dir = Application.app_dir(:trip_tally_web)
+
     assert {:error, _reason} = Media.upload_image(user, upload)
   end
 end
