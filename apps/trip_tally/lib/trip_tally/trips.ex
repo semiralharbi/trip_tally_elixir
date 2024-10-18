@@ -59,8 +59,7 @@ defmodule TripTally.Trips do
     |> Map.put("user_id", user_id)
   end
 
-  defp handle_transaction_result({:ok, %{trip: trip}}),
-    do: {:ok, repo_preload_trip(trip)}
+  defp handle_transaction_result({:ok, %{trip: trip}}), do: {:ok, repo_preload_trip(trip)}
 
   defp handle_transaction_result({:error, _, changeset, _}), do: {:error, changeset}
 
