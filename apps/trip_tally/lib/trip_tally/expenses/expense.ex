@@ -2,6 +2,7 @@ defmodule TripTally.Expenses.Expense do
   @moduledoc """
   This module holds the Expenses schema.
   """
+  alias TripTally.Utils.DateParser
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -27,6 +28,8 @@ defmodule TripTally.Expenses.Expense do
 
   @doc false
   def changeset(expense, attrs) do
+    attrs = attrs |> normalize_dates()
+
     expense
     |> cast(attrs, @cast_fields)
     |> validate_required(@required_fields)
@@ -36,11 +39,18 @@ defmodule TripTally.Expenses.Expense do
   end
 
   def changeset_update(expense, attrs) do
+    attrs = attrs |> normalize_dates()
+
     expense
     |> cast(attrs, @update_fields)
     |> validate_required(@required_fields)
     |> foreign_key_constraint(:trip_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:category_id)
+  end
+
+  defp normalize_dates(attrs) do
+    attrs
+    |> DateParser.normalize_date("date")
   end
 end
