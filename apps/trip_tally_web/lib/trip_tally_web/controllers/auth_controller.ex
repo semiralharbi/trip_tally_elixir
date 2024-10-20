@@ -5,6 +5,7 @@ defmodule TripTallyWeb.AuthController do
     quote do
       use TripTallyWeb, :controller
       action_fallback TripTallyWeb.FallbackController
+      plug TripTallyWeb.Plugs.CheckEmptyParams
 
       def action(conn, opts) do
         user = conn.assigns[:current_user] || %{}

@@ -56,4 +56,11 @@ defmodule TripTallyWeb.FallbackController do
     |> put_view(ErrorJSON)
     |> render("error_message.json", message: "Invalid email or password")
   end
+
+  def call(conn, {:error, :bad_request}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(TripTallyWeb.ErrorJSON)
+    |> render("400.json", %{})
+  end
 end
