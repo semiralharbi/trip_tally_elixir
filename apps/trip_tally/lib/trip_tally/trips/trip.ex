@@ -6,10 +6,10 @@ defmodule TripTally.Trips.Trip do
   import Ecto.Changeset
   import Ecto.Query
 
-  alias TripTally.Utils.DateParser
   alias Money.Ecto.Composite.Type, as: MoneyType
   alias TripTally.Expenses.Expense
   alias TripTally.Repo
+  alias TripTally.Utils.DateParser
 
   @trip_statuses [:planned, :in_progress, :completed]
   @primary_key {:id, :binary_id, autogenerate: true}

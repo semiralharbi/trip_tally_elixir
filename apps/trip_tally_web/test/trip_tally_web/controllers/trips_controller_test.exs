@@ -45,15 +45,18 @@ defmodule TripTallyWeb.TripsControllerTest do
       conn = get(conn, "/api/trips/#{new_trip.id}")
 
       %{
-        "trip" => %{
-          "transport_type" => ^transport_type,
-          "date_from" => "2024-01-01",
-          "date_to" => "2024-01-05",
-          "id" => ^trip_id,
-          "planned_cost" => %{"amount" => "1000", "currency" => "USD"},
-          "expenses" => [],
-          "status" => "planned"
-        }
+        "transport_type" => ^transport_type,
+        "date_from" => "2024-01-01",
+        "date_to" => "2024-01-05",
+        "id" => ^trip_id,
+        "location" => %{
+          "city_name" => "New York",
+          "country_code" => "US"
+        },
+        "planned_cost" => %{"amount" => "1000", "currency" => "USD"},
+        "expenses" => [],
+        "total_expenses" => "0.0",
+        "status" => "planned"
       } = json_response(conn, 200)
     end
   end
@@ -90,40 +93,39 @@ defmodule TripTallyWeb.TripsControllerTest do
       conn = post(conn, "/api/trips", trip_attrs)
 
       assert %{
-               "trip" => %{
-                 "user_id" => ^user_id,
-                 "planned_cost" => %{
-                   "amount" => "1000",
-                   "currency" => "EUR"
-                 },
-                 "transport_type" => "Bus",
-                 "location" => %{
-                   "city_name" => "Poznan",
-                   "country_code" => "PL"
-                 },
-                 "date_from" => "2024-04-01",
-                 "date_to" => "2024-04-10",
-                 "expenses" => [
-                   %{
-                     "name" => "Hotel",
-                     "price" => %{"amount" => "1000", "currency" => "USD"},
-                     "date" => "2024-04-02",
-                     "category" => %{
-                       "name" => "Test Category",
-                       "translation_key" => "expense_category.test"
-                     }
-                   },
-                   %{
-                     "name" => "Flight",
-                     "price" => %{"amount" => "1000", "currency" => "USD"},
-                     "date" => "2024-04-01",
-                     "category" => %{
-                       "name" => "Test Category",
-                       "translation_key" => "expense_category.test"
-                     }
+               "user_id" => ^user_id,
+               "planned_cost" => %{
+                 "amount" => "1000",
+                 "currency" => "EUR"
+               },
+               "transport_type" => "Bus",
+               "location" => %{
+                 "city_name" => "Poznan",
+                 "country_code" => "PL"
+               },
+               "date_from" => "2024-04-01",
+               "date_to" => "2024-04-10",
+               "total_expenses" => "2000.00",
+               "expenses" => [
+                 %{
+                   "name" => "Hotel",
+                   "price" => %{"amount" => "1000", "currency" => "USD"},
+                   "date" => "2024-04-02",
+                   "category" => %{
+                     "name" => "Test Category",
+                     "translation_key" => "expense_category.test"
                    }
-                 ]
-               }
+                 },
+                 %{
+                   "name" => "Flight",
+                   "price" => %{"amount" => "1000", "currency" => "USD"},
+                   "date" => "2024-04-01",
+                   "category" => %{
+                     "name" => "Test Category",
+                     "translation_key" => "expense_category.test"
+                   }
+                 }
+               ]
              } = json_response(conn, 201)
     end
 
@@ -212,20 +214,19 @@ defmodule TripTallyWeb.TripsControllerTest do
         })
 
       assert %{
-               "trip" => %{
-                 "user_id" => ^user_id,
-                 "planned_cost" => %{
-                   "amount" => "3500",
-                   "currency" => "EUR"
-                 },
-                 "transport_type" => "Bus",
-                 "location" => %{
-                   "city_name" => "Αθήνα",
-                   "country_code" => "GR"
-                 },
-                 "date_from" => "2024-04-01",
-                 "date_to" => "2024-04-10"
-               }
+               "user_id" => ^user_id,
+               "planned_cost" => %{
+                 "amount" => "3500",
+                 "currency" => "EUR"
+               },
+               "transport_type" => "Bus",
+               "location" => %{
+                 "city_name" => "Αθήνα",
+                 "country_code" => "GR"
+               },
+               "total_expenses" => "0.0",
+               "date_from" => "2024-04-01",
+               "date_to" => "2024-04-10"
              } = json_response(conn, 201)
     end
 
@@ -264,21 +265,20 @@ defmodule TripTallyWeb.TripsControllerTest do
       conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @update_attrs})
 
       assert %{
-               "trip" => %{
-                 "id" => ^trip_id,
-                 "user_id" => ^user_id,
-                 "planned_cost" => %{
-                   "amount" => "350",
-                   "currency" => "EUR"
-                 },
-                 "transport_type" => "Bus",
-                 "location" => %{
-                   "city_name" => "New York",
-                   "country_code" => "US"
-                 },
-                 "date_from" => "2024-01-01",
-                 "date_to" => "2024-01-05"
-               }
+               "id" => ^trip_id,
+               "user_id" => ^user_id,
+               "planned_cost" => %{
+                 "amount" => "350",
+                 "currency" => "EUR"
+               },
+               "transport_type" => "Bus",
+               "location" => %{
+                 "city_name" => "New York",
+                 "country_code" => "US"
+               },
+               "total_expenses" => "0.0",
+               "date_from" => "2024-01-01",
+               "date_to" => "2024-01-05"
              } = json_response(conn, 200)
     end
 

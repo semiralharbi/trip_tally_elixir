@@ -1,4 +1,7 @@
 defmodule TripTally.Utils.DateParser do
+  @moduledoc """
+  This module is used for parsing dates
+  """
   def parse_date(date_string) do
     formats = [
       "{0D}-{0M}-{YYYY}",

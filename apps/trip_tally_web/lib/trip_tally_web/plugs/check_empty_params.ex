@@ -1,4 +1,7 @@
 defmodule TripTallyWeb.Plugs.CheckEmptyParams do
+  @moduledoc """
+  This module ensures that bad request is returned when params in controllers are empty for update or create
+  """
   import Plug.Conn
   import Phoenix.Controller
 
