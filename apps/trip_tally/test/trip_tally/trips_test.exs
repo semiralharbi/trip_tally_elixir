@@ -202,9 +202,9 @@ defmodule TripTally.TripsTest do
   test "calculates total expenses for a trip" do
     trip = insert(:trip)
 
-    insert(:expense, trip_id: trip.id, price: Money.new(10000, :USD))
-    insert(:expense, trip_id: trip.id, price: Money.new(15000, :USD))
-    insert(:expense, trip_id: trip.id, price: Money.new(5000, :USD))
+    insert(:expense, trip_id: trip.id, price: Money.new(10_000, :USD))
+    insert(:expense, trip_id: trip.id, price: Money.new(15_000, :USD))
+    insert(:expense, trip_id: trip.id, price: Money.new(50_00, :USD))
 
     assert {:ok, fetched_trip} = Trips.fetch_trip_by_id(trip.id)
 
