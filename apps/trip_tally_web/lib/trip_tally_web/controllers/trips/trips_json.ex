@@ -14,7 +14,6 @@ defmodule TripTallyWeb.Trips.TripsJSON do
   Renders a single trip.
   """
   def show(%{trip: %Trip{} = trip}) do
-    trip = Money.convert_to_decimal_amount(trip)
-    %{trip: trip}
+    Money.convert_to_decimal_amount(trip)
   end
 end

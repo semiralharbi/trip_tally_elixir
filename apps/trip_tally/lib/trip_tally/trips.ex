@@ -86,7 +86,7 @@ defmodule TripTally.Trips do
       |> group_by([t], t.id)
       |> preload([t, e], [:location, expenses: [:category]])
       |> select_merge([t, e], %{
-        total_expenses: fragment("COALESCE(SUM((?).amount), 0.0)", e.price)
+        total_expenses: fragment("COALESCE(ROUND(SUM((?).amount) / 100, 2), 0.0)", e.price)
       })
 
     case Repo.one(query) do
@@ -106,7 +106,7 @@ defmodule TripTally.Trips do
       |> group_by([t], t.id)
       |> preload([t, e], [:location, expenses: [:category]])
       |> select_merge([t, e], %{
-        total_expenses: fragment("COALESCE(SUM((?).amount), 0.0)", e.price)
+        total_expenses: fragment("COALESCE(ROUND(SUM((?).amount) / 100, 2), 0.0)", e.price)
       })
 
     Repo.all(query)
