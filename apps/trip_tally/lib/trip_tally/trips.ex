@@ -118,19 +118,19 @@ defmodule TripTally.Trips do
   Fetch all trips by user_id.
   """
   def get_trips_by_user(user_id) do
-    query =
-      Trip
-      |> where([t], t.user_id == ^user_id)
-      |> calculate_total_expenses()
-
-    Repo.all(query)
+    Trip
+    |> where([t], t.user_id == ^user_id)
+    |> calculate_total_expenses()
+    |> order_by([t], asc: t.date_from, asc: t.date_to)
+    |> Repo.all()
   end
 
   @doc """
   Update a trip by id and replace the attrs.
   """
   def update(trip, attrs) do
-    updated_attrs = Money.maybe_update_price(trip, attrs)
+    updated_attrs = attrs |> fetch_location_id()
+    updated_attrs = Money.maybe_update_price(trip, updated_attrs)
 
     trip
     |> Trip.changeset_update(updated_attrs)
@@ -166,5 +166,12 @@ defmodule TripTally.Trips do
     |> select_merge([t, e], %{
       total_expenses: fragment("COALESCE(ROUND(SUM((?).amount) / 100, 2), 0.0)", e.price)
     })
+  end
+
+  defp fetch_location_id(attrs) do
+    case TripTally.Locations.create_or_fetch_location(attrs) do
+      {:ok, location} -> Map.put(attrs, "location_id", location.id)
+      error -> dbg(error)
+    end
   end
 end

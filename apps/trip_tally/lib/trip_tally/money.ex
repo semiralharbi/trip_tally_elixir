@@ -54,7 +54,7 @@ defmodule TripTally.Money do
 
         {new_amount, new_currency}
         |> update_price_if_changed(existing_price)
-        |> update_params_with_price(params, "planned_cost")
+        |> update_params_with_price(attrs, "planned_cost")
     end
   end
 
