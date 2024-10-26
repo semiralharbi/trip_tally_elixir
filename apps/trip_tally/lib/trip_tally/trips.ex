@@ -129,8 +129,10 @@ defmodule TripTally.Trips do
   Update a trip by id and replace the attrs.
   """
   def update(trip, attrs) do
-    updated_attrs = attrs |> fetch_location_id()
-    updated_attrs = Money.maybe_update_price(trip, updated_attrs)
+    updated_attrs =
+      attrs
+      |> fetch_location_id()
+      |> Money.maybe_update_price(trip)
 
     trip
     |> Trip.changeset_update(updated_attrs)

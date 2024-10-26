@@ -43,7 +43,7 @@ defmodule TripTally.Money do
     end
   end
 
-  def maybe_update_price(%Trip{planned_cost: existing_price}, %{"planned_cost" => params} = attrs) do
+  def maybe_update_price(%{"planned_cost" => params} = attrs, %Trip{planned_cost: existing_price}) do
     case params do
       nil ->
         attrs
