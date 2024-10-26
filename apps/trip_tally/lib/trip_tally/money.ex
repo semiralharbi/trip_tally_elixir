@@ -28,7 +28,7 @@ defmodule TripTally.Money do
   defp parse_amount(amount) when is_integer(amount), do: round(amount * 100)
   defp parse_amount(_), do: nil
 
-  def maybe_update_price(%Expense{price: existing_price}, %{"price" => params} = attrs) do
+  def maybe_update_price(%{"price" => params} = attrs, %Expense{price: existing_price}) do
     case params do
       nil ->
         attrs
@@ -43,7 +43,7 @@ defmodule TripTally.Money do
     end
   end
 
-  def maybe_update_price(%Trip{planned_cost: existing_price}, %{"planned_cost" => params} = attrs) do
+  def maybe_update_price(%{"planned_cost" => params} = attrs, %Trip{planned_cost: existing_price}) do
     case params do
       nil ->
         attrs
@@ -54,11 +54,11 @@ defmodule TripTally.Money do
 
         {new_amount, new_currency}
         |> update_price_if_changed(existing_price)
-        |> update_params_with_price(params, "planned_cost")
+        |> update_params_with_price(attrs, "planned_cost")
     end
   end
 
-  def maybe_update_price(_entity, attrs), do: attrs
+  def maybe_update_price(attrs, _entity), do: attrs
 
   defp update_price_if_changed({new_amount, new_currency}, %Money{
          amount: existing_amount,

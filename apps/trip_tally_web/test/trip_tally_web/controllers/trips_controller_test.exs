@@ -262,7 +262,7 @@ defmodule TripTallyWeb.TripsControllerTest do
     test "renders updated trip when data is valid", %{conn: conn, user: %{id: user_id}} do
       %{id: trip_id} = insert(:trip, %{user_id: user_id})
 
-      conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @update_attrs})
+      conn = put(conn, "/api/trips/#{trip_id}", @update_attrs)
 
       assert %{
                "id" => ^trip_id,
@@ -285,7 +285,7 @@ defmodule TripTallyWeb.TripsControllerTest do
     test "renders errors when data is invalid", %{conn: conn, user: %{id: user_id}} do
       %{id: trip_id} = insert(:trip, %{user_id: user_id})
 
-      conn = put(conn, "/api/trips/#{trip_id}", %{"trip_params" => @invalid_attrs})
+      conn = put(conn, "/api/trips/#{trip_id}", @invalid_attrs)
       response = json_response(conn, 422)
 
       expected_errors = [

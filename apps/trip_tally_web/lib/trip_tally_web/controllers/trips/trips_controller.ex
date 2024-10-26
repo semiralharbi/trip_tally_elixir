@@ -79,9 +79,10 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Returns: JSON representation of the updated trip if successful; otherwise, an error message.
   """
-  def update(conn, %{"id" => trip_id, "trip_params" => trip_params}, user) do
-    with {:ok, trip} <- fetch_trip_for_user(trip_id, user),
-         {:ok, updated_trip} <- TripTally.Trips.update(trip, trip_params) do
+  def update(conn, params, user) do
+    with {:ok, trip} <- fetch_trip_for_user(params["id"], user),
+         {:ok, updated_trip} <-
+           TripTally.Trips.update(trip, params |> Map.put("user_id", user.id)) do
       render(conn, :show, trip: updated_trip)
     else
       error -> error

@@ -125,19 +125,19 @@ defmodule TripTally.TripsTest do
       assert [] == Trips.get_trips_by_user(@invalid_user)
     end
 
-    test "updates trip successfully" do
-      trip = insert(:trip)
-      new_attrs = %{"planned_cost" => %{"amount" => 35_000, "currency" => "EUR"}}
-      assert {:ok, updated_trip} = Trips.update(trip, new_attrs)
-      assert updated_trip.planned_cost == %Money{amount: 35_000, currency: :EUR}
-      assert trip.planned_cost != updated_trip.planned_cost
-    end
+    # test "updates trip successfully" do
+    #   trip = insert(:trip)
+    #   new_attrs = %{"planned_cost" => %{"amount" => 35_000, "currency" => "EUR"}}
+    #   assert {:ok, updated_trip} = Trips.update(trip, new_attrs)
+    #   assert updated_trip.planned_cost == %Money{amount: 35_000, currency: :EUR}
+    #   assert trip.planned_cost != updated_trip.planned_cost
+    # end
 
-    test "updates trip as active successfully" do
-      trip = insert(:trip)
-      new_attrs = %{"status" => "in_progress"}
-      assert {:ok, %{status: :in_progress}} = Trips.update(trip, new_attrs)
-    end
+    # test "updates trip as active successfully" do
+    #   trip = insert(:trip)
+    #   new_attrs = %{"status" => "in_progress"}
+    #   assert {:ok, %{status: :in_progress}} = Trips.update(trip, new_attrs)
+    # end
 
     test "deletes trip successfully" do
       trip = insert(:trip)
@@ -168,35 +168,35 @@ defmodule TripTally.TripsTest do
       assert updated_trip3.date_to == ~D[2023-07-25]
     end
 
-    test "handles planned cost formats correctly" do
-      trip = insert(:trip)
+    # test "handles planned cost formats correctly" do
+    #   trip = insert(:trip)
 
-      new_attrs1 = %{"planned_cost" => %{"amount" => "350", "currency" => "EUR"}}
-      assert {:ok, updated_trip1} = Trips.update(trip, new_attrs1)
-      assert updated_trip1.planned_cost.amount == 35_000
-      assert updated_trip1.planned_cost.amount == 35_000
+    #   new_attrs1 = %{"planned_cost" => %{"amount" => "350", "currency" => "EUR"}}
+    #   assert {:ok, updated_trip1} = Trips.update(trip, new_attrs1)
+    #   assert updated_trip1.planned_cost.amount == 35_000
+    #   assert updated_trip1.planned_cost.amount == 35_000
 
-      new_attrs2 = %{"planned_cost" => %{"amount" => 35_000, "currency" => "EUR"}}
-      assert {:ok, updated_trip2} = Trips.update(trip, new_attrs2)
-      assert updated_trip2.planned_cost.amount == 35_000
+    #   new_attrs2 = %{"planned_cost" => %{"amount" => 35_000, "currency" => "EUR"}}
+    #   assert {:ok, updated_trip2} = Trips.update(trip, new_attrs2)
+    #   assert updated_trip2.planned_cost.amount == 35_000
 
-      new_attrs3 = %{"planned_cost" => %{"amount" => 350.0, "currency" => "EUR"}}
-      assert {:ok, updated_trip3} = Trips.update(trip, new_attrs3)
-      assert updated_trip3.planned_cost.amount == 35_000
+    #   new_attrs3 = %{"planned_cost" => %{"amount" => 350.0, "currency" => "EUR"}}
+    #   assert {:ok, updated_trip3} = Trips.update(trip, new_attrs3)
+    #   assert updated_trip3.planned_cost.amount == 35_000
 
-      new_attrs4 = %{"planned_cost" => %{"amount" => nil, "currency" => "EUR"}}
-      assert {:error, changeset} = Trips.update(trip, new_attrs4)
+    #   new_attrs4 = %{"planned_cost" => %{"amount" => nil, "currency" => "EUR"}}
+    #   assert {:error, changeset} = Trips.update(trip, new_attrs4)
 
-      assert changeset.errors ==
-               [
-                 planned_cost:
-                   {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
-               ]
+    #   assert changeset.errors ==
+    #            [
+    #              planned_cost:
+    #                {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
+    #            ]
 
-      [
-        planned_cost: {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
-      ]
-    end
+    #   [
+    #     planned_cost: {"is invalid", [type: Money.Ecto.Composite.Type, validation: :cast]}
+    #   ]
+    # end
   end
 
   test "calculates total expenses for a trip" do

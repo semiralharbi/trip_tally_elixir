@@ -9,10 +9,11 @@ defmodule TripTally.Locations do
   @doc """
   Creates a location or fetches an existing one based on the given attributes.
   """
-  def create_or_fetch_location(
-        %{"country_code" => country_code, "city_name" => city_name} = attrs
-      ) do
-    case get_location_by_country_and_city(country_code, city_name) do
+  def create_or_fetch_location(attrs) do
+    case get_location_by_country_and_city(
+           Map.get(attrs, "country_code"),
+           Map.get(attrs, "city_name")
+         ) do
       nil ->
         create_location(attrs)
 

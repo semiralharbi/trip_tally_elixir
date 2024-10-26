@@ -33,7 +33,7 @@ defmodule TripTally.Trips.Trip do
   end
 
   @required_params ~w(transport_type date_from date_to planned_cost location_id user_id status)a
-  @update_params ~w(transport_type planned_cost date_from date_to status)a
+  @update_params ~w(transport_type planned_cost date_from date_to status location_id)a
 
   def changeset(trip, attrs) do
     attrs = attrs |> normalize_dates()
