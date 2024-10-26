@@ -173,7 +173,7 @@ defmodule TripTally.Trips do
   defp fetch_location_id(attrs) do
     case TripTally.Locations.create_or_fetch_location(attrs) do
       {:ok, location} -> Map.put(attrs, "location_id", location.id)
-      error -> dbg(error)
+      _ -> attrs
     end
   end
 end
