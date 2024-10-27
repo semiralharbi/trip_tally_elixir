@@ -12,8 +12,7 @@ defmodule TripTally.LocationsTest do
     test "create_or_fetch_location succesfully", %{user: %{id: user_id}} do
       assert {:ok, %Locations{city_name: "New York", country_code: "US"}} =
                TripTally.Locations.create_or_fetch_location(%{
-                 "city_name" => "New York",
-                 "country_code" => "US",
+                 "location" => %{"city_name" => "New York", "country_code" => "US"},
                  "user_id" => user_id
                })
     end

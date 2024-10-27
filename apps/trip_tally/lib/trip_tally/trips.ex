@@ -82,6 +82,11 @@ defmodule TripTally.Trips do
 
   defp handle_transaction_result({:error, _, changeset, _}), do: {:error, changeset}
 
+  defp create_trip(attrs, nil) do
+    attrs
+    |> create_trip()
+  end
+
   defp create_trip(attrs, location) do
     attrs
     |> Map.put("location_id", location.id)

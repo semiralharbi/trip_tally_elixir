@@ -12,16 +12,20 @@ defmodule TripTallyWeb.TripsControllerTest do
     "date_to" => ~D[2024-04-10],
     "transport_type" => nil,
     "planned_cost" => nil,
-    "country_code" => "PL",
-    "city_name" => "Poznan"
+    "location" => %{
+      "country_code" => "PL",
+      "city_name" => "Poznan"
+    }
   }
   @invalid_attrs_no_country %{
     "transport_type" => nil,
     "planned_cost" => nil,
     "date_from" => ~D[2024-04-01],
     "date_to" => ~D[2024-04-10],
-    "country_code" => nil,
-    "city_name" => nil
+    "location" => %{
+      "country_code" => nil,
+      "city_name" => nil
+    }
   }
 
   setup :register_and_log_in_user
@@ -72,8 +76,10 @@ defmodule TripTallyWeb.TripsControllerTest do
         "planned_cost" => %{"currency" => "EUR", "amount" => 1000.0},
         "date_from" => ~D[2024-04-01],
         "date_to" => ~D[2024-04-10],
-        "country_code" => "PL",
-        "city_name" => "Poznan",
+        "location" => %{
+          "country_code" => "PL",
+          "city_name" => "Poznan"
+        },
         "expenses" => [
           %{
             "name" => "Hotel",
@@ -138,8 +144,10 @@ defmodule TripTallyWeb.TripsControllerTest do
         "transport_type" => "Bus",
         "date_from" => ~D[2024-04-01],
         "date_to" => ~D[2024-04-10],
-        "country_code" => "PL",
-        "city_name" => "Poznan",
+        "location" => %{
+          "country_code" => "PL",
+          "city_name" => "Poznan"
+        },
         "expenses" => [
           %{
             "name" => "",
@@ -173,8 +181,10 @@ defmodule TripTallyWeb.TripsControllerTest do
         "transport_type" => "Bus",
         "date_from" => ~D[2024-04-01],
         "date_to" => ~D[2024-04-10],
-        "country_code" => "PL",
-        "city_name" => "Poznan",
+        "location" => %{
+          "country_code" => "PL",
+          "city_name" => "Poznan"
+        },
         "expenses" => [
           %{
             "name" => "",
@@ -209,8 +219,7 @@ defmodule TripTallyWeb.TripsControllerTest do
           "planned_cost" => %{"currency" => "EUR", "amount" => 3500.0},
           "date_from" => ~D[2024-04-01],
           "date_to" => ~D[2024-04-10],
-          "country_code" => "GR",
-          "city_name" => "Αθήνα"
+          "location" => %{"country_code" => "GR", "city_name" => "Αθήνα"}
         })
 
       assert %{
