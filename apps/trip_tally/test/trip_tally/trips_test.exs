@@ -42,8 +42,7 @@ defmodule TripTally.TripsTest do
       category: %{id: category_id}
     } do
       additional_attrs = %{
-        "country_code" => "PL",
-        "city_name" => "Bydgoszcz",
+        "location" => %{"country_code" => "PL", "city_name" => "Bydgoszcz"},
         "planned_cost" => %{"amount" => 350.0, "currency" => "EUR"},
         "expenses" => [
           %{
@@ -76,8 +75,7 @@ defmodule TripTally.TripsTest do
 
     test "fails to create trip with invalid expense category" do
       additional_attrs = %{
-        "country_code" => "PL",
-        "city_name" => "Bydgoszcz",
+        "location" => %{"country_code" => "PL", "city_name" => "Bydgoszcz"},
         "expenses" => [
           %{
             "name" => "Invalid Expense",
