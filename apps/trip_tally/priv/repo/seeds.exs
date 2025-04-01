@@ -29,7 +29,7 @@ defmodule TripTally.Repo.Seeds do
         %User{
           email: email,
           username: random_username(),
-          hashed_password: password,
+          hashed_password: Bcrypt.hash_pwd_salt(password),
           country: random_country(),
           default_currency_code: random_currency()
         }
