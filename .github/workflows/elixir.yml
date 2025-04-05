@@ -19,11 +19,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
         run: echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
-      - name: Setup Elixir and Erlang/OTP
-        uses: erlef/setup-beam@v1
-        with:
-          otp-version: "27.0"
-          elixir-version: "1.18.3"
+      - name: setup-beam
+        uses: erlef/setup-beam@v1.18.2 
       - name: Run Credo
         uses: ./.github/actions/run-credo
         with:
@@ -38,11 +35,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
         run: echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
-      - name: Setup Elixir and Erlang/OTP
-        uses: erlef/setup-beam@v1
-        with:
-          otp-version: "27.0"
-          elixir-version: "1.18.3"
+      - name: setup-beam
+        uses: erlef/setup-beam@v1.18.2
       - name: Check Formatting
         uses: ./.github/actions/format-check
         with:
@@ -72,11 +66,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
         run: echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
-      - name: Setup Elixir and Erlang/OTP
-        uses: erlef/setup-beam@v1
-        with:
-          otp-version: "27.0"
-          elixir-version: "1.18.3"
+      - name: setup-beam
+        uses: erlef/setup-beam@v1.18.2
       - name: Run Tests
         uses: ./.github/actions/run-tests
         with:
