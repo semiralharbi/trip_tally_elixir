@@ -15,12 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install CA Certificates
-        run: sudo apt-get update && sudo apt-get install -y ca-certificates
-      - name: Set SSL_CERT_FILE
-        run: echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
       - name: setup-beam
-        uses: erlef/setup-beam@v1.18.2 
+        uses: erlef/setup-beam@v1.18.2
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
       - name: Run Credo
         uses: ./.github/actions/run-credo
         with:
@@ -31,12 +30,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install CA Certificates
-        run: sudo apt-get update && sudo apt-get install -y ca-certificates
-      - name: Set SSL_CERT_FILE
-        run: echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
       - name: setup-beam
         uses: erlef/setup-beam@v1.18.2
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
       - name: Check Formatting
         uses: ./.github/actions/format-check
         with:
@@ -62,12 +60,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Install CA Certificates
-        run: sudo apt-get update && sudo apt-get install -y ca-certificates
-      - name: Set SSL_CERT_FILE
-        run: echo "SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt" >> $GITHUB_ENV
       - name: setup-beam
         uses: erlef/setup-beam@v1.18.2
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
       - name: Run Tests
         uses: ./.github/actions/run-tests
         with:
