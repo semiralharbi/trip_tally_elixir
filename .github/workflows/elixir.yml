@@ -14,7 +14,7 @@ jobs:
     name: Credo Linting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
       - name: Install CA Certificates
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
@@ -33,7 +33,7 @@ jobs:
     name: Check Formatting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
       - name: Install CA Certificates
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
@@ -67,7 +67,7 @@ jobs:
           --health-retries=5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
       - name: Install CA Certificates
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
