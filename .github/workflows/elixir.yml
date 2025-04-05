@@ -15,6 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
       - name: Install CA Certificates
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
@@ -34,6 +37,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
       - name: Install CA Certificates
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
@@ -68,6 +74,9 @@ jobs:
 
     steps:
       - uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
       - name: Install CA Certificates
         run: sudo apt-get update && sudo apt-get install -y ca-certificates
       - name: Set SSL_CERT_FILE
