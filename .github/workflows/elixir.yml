@@ -76,6 +76,8 @@ jobs:
         mix clean
       shell: sh
 
+    - name: Install ImageMagick
+      run: sudo apt-get install -y -qq imagemagick
 
     - name: Install dependencies
       run: mix deps.get
