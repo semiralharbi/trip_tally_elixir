@@ -20,5 +20,5 @@ defmodule TripTallyWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :trip_tally_web
+  use Gettext.Backend, otp_app: :trip_tally_web
 end

@@ -6,68 +6,67 @@ on:
   pull_request:
     branches: ["master"]
 
+env:
+  MIX_ENV: test
+
 permissions:
   contents: read
 
 jobs:
-  credo:
-    name: Credo Linting
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: postgres:14
+        ports: ['5432:5432']
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Elixir and Erlang/OTP
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
+      - name: Install ImageMagick
+        run: sudo apt-get install -y -qq imagemagick
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Run Tests
+        run: mix test
+
+  lint:
+    name: Run Credo Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Elixir
-        uses: ./.github/actions/setup-elixir
+      - name: Setup Elixir and Erlang/OTP
+        uses: erlef/setup-beam@v1
         with:
-          elixir-version: "1.16.2"
-          otp-version: "26.0"
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
+      - name: Install dependencies
+        run: mix deps.get
       - name: Run Credo
-        uses: ./.github/actions/run-credo
-        with:
-          elixir-version: "1.16.2"
+        run: mix credo
 
-  formatting:
+  format:
     name: Check Formatting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Elixir
-        uses: ./.github/actions/setup-elixir
+      - name: Setup Elixir and Erlang/OTP
+        uses: erlef/setup-beam@v1
         with:
-          elixir-version: "1.16.2"
-          otp-version: "26.0"
+          otp-version: "27.0"
+          elixir-version: "1.18.3"
+      - name: Install dependencies
+        run: mix deps.get
       - name: Check Formatting
-        uses: ./.github/actions/format-check
-        with:
-          elixir-version: "1.16.2"
-
-  tests:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: triptally_test
-        options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Elixir
-        uses: ./.github/actions/setup-elixir
-        with:
-          elixir-version: "1.16.2"
-          otp-version: "26.0"
-      - name: Run Tests
-        uses: ./.github/actions/run-tests
-        with:
-          elixir-version: "1.16.2"
-          postgres-host: "localhost"
-          postgres-port: "5432"
+        run: mix format --check-formatted
