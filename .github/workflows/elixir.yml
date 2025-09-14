@@ -8,6 +8,8 @@ on:
 
 env:
   MIX_ENV: test
+  ELIXIR_VERSION: 1.18.4
+  OTP_VERSION: 28.0
 
 permissions:
   contents: read
@@ -32,8 +34,8 @@ jobs:
       - name: Setup Elixir and Erlang/OTP
         uses: erlef/setup-beam@v1
         with:
-          otp-version: "27.0"
-          elixir-version: "1.18.3"
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
       - name: Install ImageMagick
         run: sudo apt-get install -y -qq imagemagick
       - name: Install dependencies
@@ -49,8 +51,8 @@ jobs:
       - name: Setup Elixir and Erlang/OTP
         uses: erlef/setup-beam@v1
         with:
-          otp-version: "27.0"
-          elixir-version: "1.18.3"
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
       - name: Install dependencies
         run: mix deps.get
       - name: Run Credo
@@ -64,8 +66,8 @@ jobs:
       - name: Setup Elixir and Erlang/OTP
         uses: erlef/setup-beam@v1
         with:
-          otp-version: "27.0"
-          elixir-version: "1.18.3"
+          elixir-version: ${{ env.ELIXIR_VERSION }}
+          otp-version: ${{ env.OTP_VERSION }}
       - name: Install dependencies
         run: mix deps.get
       - name: Check Formatting
