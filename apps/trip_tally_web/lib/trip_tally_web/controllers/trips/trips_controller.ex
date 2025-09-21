@@ -115,12 +115,12 @@ defmodule TripTallyWeb.Trips.TripsController do
 
   Parameters: None required. The user ID is obtained from the session.
 
-  Returns: JSON array of trips starting today, or an empty array if none found.
+  Returns: JSON object with trip starting today, or null if none found.
   """
   def today(conn, _params, user) do
     case TripTally.Trips.fetch_trip_starting_today(user.id) do
-      {:ok, trip} -> render(conn, :show, trip: trip)
-      error -> error
+      {:ok, trip} -> render(conn, :today, trip: trip)
+      {:error, :not_found} -> render(conn, :today, trip: nil)
     end
   end
 

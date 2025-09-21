@@ -16,4 +16,16 @@ defmodule TripTallyWeb.Trips.TripsJSON do
   def show(%{trip: %Trip{} = trip}) do
     Money.convert_to_decimal_amount(trip)
   end
+
+  @doc """
+  Renders trip for today endpoint.
+  """
+  def today(%{trip: nil}) do
+    %{trip: nil}
+  end
+
+  def today(%{trip: %Trip{} = trip}) do
+    trip = Money.convert_to_decimal_amount(trip)
+    trip
+  end
 end
